@@ -1,63 +1,134 @@
-#include <DHT.h>
-#include <U8g2lib.h>
-#include <U8x8lib.h>
+/*
+ * https://circuits4you.com
+ * I2C LCD Interfacing with ESP8266 and ESP32
+ * 
+ */
+#include <LiquidCrystal_I2C.h>
 
-#define DHTTYPE    DHT22
+LiquidCrystal_I2C lcd(0x27, 16, 2); // set the LCD address to 0x27 for a 16 chars and 2 line display
 
-char temperature [5];
-char humidity [5];
-const char DEGREE_SYMBOL[] = { 0xB0, '\0' };
-
-DHT dht(16, DHTTYPE);
-
-// U8G2_ST7920_128X64_1_HW_SPI u8g2(U8G2_R0, /* CS=*/ 10, /* reset=*/ 8);
-// U8G2_ST7920_128X64_1_HW_SPI u8g2(U8G2_R0,D8);
-// U8G2_ST7920_128X64_1_SW_SPI u8g2(U8G2_R0, /* E=*/ 14, /* R/W=*/ 13, /* RS=*/ 15);
-U8G2_ST7920_128X64_F_SW_SPI u8g2(U8G2_R2, 14, 13, 15, U8X8_PIN_NONE);
-
-void setup() {  
-
-  dht.begin();
-  Serial.begin(115200); 
-  u8g2.begin();
-  u8g2.enableUTF8Print();
-  u8g2.setFont(u8g2_font_helvB10_tf); 
-  u8g2.setColorIndex(1);  
-}
-
-void loop() {  
-  u8g2.firstPage();
-  do {   
-    draw();
-  } while( u8g2.nextPage() );
-}
-  
-void draw(){
-
-  readTemperature();
-  readHumidity();
-  
-  u8g2.drawFrame(0,0,128,31);         
-  u8g2.drawFrame(0,33,128,31);           
-  
-  u8g2.drawStr( 15, 13, "Temperature");   
-  u8g2.drawStr( 35, 28, temperature);   
-  u8g2.drawUTF8(70, 28, DEGREE_SYMBOL);
-  u8g2.drawUTF8(76, 28, "C");
-
-  u8g2.drawStr(30,46, "Humidity");         
-  u8g2.drawStr( 37, 61, humidity); 
-  u8g2.drawStr(75,61, "%");  
-}
-
-void readTemperature()
+void updateStats()
 {
-  float t = dht.readTemperature();
-  dtostrf(t, 3, 1, temperature);
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("Temperature:");
+
+  lcd.setCursor(12, 0);
+  lcd.print("NAN");
+  lcd.setCursor(15, 0);
+  lcd.print("C");
+
+  lcd.setCursor(0, 1);
+  lcd.print("Humidity:");
+
+  lcd.setCursor(12, 1);
+  lcd.print("NAN");
+  lcd.setCursor(15, 1);
+  lcd.print("%");
 }
 
-void readHumidity()
+void setup()
 {
-  float h = dht.readHumidity();
-  dtostrf(h, 3, 1, humidity);
+
+  // The begin call takes the width and height. This
+  // Should match the number provided to the constructor.
+  lcd.begin(16, 2);
+  lcd.init();
+
+  // Turn on the backlight.
+  lcd.backlight();
+
+  // Move the cursor characters to the right and
+  // zero characters down (line 1).
+  lcd.setCursor(0, 0);
+
+  // Print HELLO to the screen, starting at 5,0.
+  lcd.print("Weather Station");
+
+  // Move the cursor to the next line and print
+  // WORLD.
+  lcd.setCursor(6, 1);
+  lcd.print("Home");
+
+  delay(400);
 }
+
+void loop()
+{
+  updateStats();
+  delay(2000);
+}
+
+// int show=0;
+
+// void setup()
+// {
+//   lcd.init();                      // initialize the lcd
+//   // Print a message to the LCD.
+//   lcd.backlight();
+//   lcd.setCursor(3,0);
+//   lcd.print("Hello, world!");
+//   lcd.setCursor(0,1);
+//   lcd.print("circuits4you.com");
+// }
+
+// void loop()
+// {
+//   if (show == 0) {
+//     lcd.setBacklight(255);
+//     lcd.home(); lcd.clear();
+//     lcd.print("Hello LCD");
+//     lcd.setCursor(0,1);
+//     lcd.print("circuits4You.com");
+//     delay(1000);
+
+//     lcd.setBacklight(0);
+//     delay(400);
+//     lcd.setBacklight(255);
+
+//   } else if (show == 1) {
+//     lcd.clear();
+//     lcd.print("Cursor On");
+//     lcd.cursor();
+
+//   } else if (show == 2) {
+//     lcd.clear();
+//     lcd.print("Cursor Blink");
+//     lcd.blink();
+
+//   } else if (show == 3) {
+//     lcd.clear();
+//     lcd.print("Cursor OFF");
+//     lcd.noBlink();
+//     lcd.noCursor();
+
+//   } else if (show == 4) {
+//     lcd.clear();
+//     lcd.print("Display Off");
+//     lcd.noDisplay();
+
+//   } else if (show == 5) {
+//     lcd.clear();
+//     lcd.print("Display On");
+//     lcd.display();
+
+//   } else if (show == 7) {
+//     lcd.clear();
+//     lcd.setCursor(0, 0);
+//     lcd.print("*** first line.");
+//     lcd.setCursor(0, 1);
+//     lcd.print("*** second line.");
+
+//   } else if (show == 8) {
+//     lcd.scrollDisplayLeft();
+//   } else if (show == 9) {
+//     lcd.scrollDisplayLeft();
+//   } else if (show == 10) {
+//     lcd.scrollDisplayLeft();
+//   } else if (show == 11) {
+//     lcd.scrollDisplayRight();
+//   }
+
+//   delay(2000);
+//   show = (show + 1) % 12;
+// }

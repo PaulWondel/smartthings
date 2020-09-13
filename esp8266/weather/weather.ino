@@ -1,34 +1,60 @@
 #include <ESP8266WiFi.h>
 #include <ESP8266WebServer.h>
 #include "DHT.h"
+#include <LiquidCrystal_I2C.h>
+
+// set the LCD address to 0x27 for a 16 chars and 2 line display
+LiquidCrystal_I2C lcd(0x27, 16, 2);
 
 // Uncomment one of the lines below for whatever DHT sensor type you're using!
-#define DHTTYPE DHT11   // DHT 11
+#define DHTTYPE DHT11 // DHT 11
 //#define DHTTYPE DHT21   // DHT 21 (AM2301)
 //#define DHTTYPE DHT22   // DHT 22  (AM2302), AM2321
 
 /*Put your SSID & Password*/
-const char* ssid = "SamsungS8";  // Enter SSID here
-const char* password = "yiwk1234";  //Enter Password here
+const char *ssid = "SamsungS8";    // Enter SSID here
+const char *password = "yiwk1234"; //Enter Password here
 
 ESP8266WebServer server(80);
 
 // DHT Sensor
-uint8_t DHTPin = D8; 
-               
+uint8_t DHTPin = D5;
+
 // Initialize DHT sensor.
-DHT dht(DHTPin, DHTTYPE);                
+DHT dht(DHTPin, DHTTYPE);
 
 float Temperature;
 float Humidity;
- 
-void setup() {
+
+void updateStats()
+{
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("Temperature:");
+
+  lcd.setCursor(13, 0);
+  lcd.print((int)Temperature);
+  lcd.setCursor(15, 0);
+  lcd.print("C");
+
+  lcd.setCursor(0, 1);
+  lcd.print("Humidity:");
+
+  lcd.setCursor(13, 1);
+  lcd.print((int)Humidity);
+  lcd.setCursor(15, 1);
+  lcd.print("%");
+  delay(2000);
+}
+
+void setup()
+{
   Serial.begin(115200);
   delay(100);
-  
+
   pinMode(DHTPin, INPUT);
 
-  dht.begin();              
+  dht.begin();
 
   Serial.println("Connecting to ");
   Serial.println(ssid);
@@ -37,13 +63,15 @@ void setup() {
   WiFi.begin(ssid, password);
 
   //check wi-fi is connected to wi-fi network
-  while (WiFi.status() != WL_CONNECTED) {
-  delay(1000);
-  Serial.print(".");
+  while (WiFi.status() != WL_CONNECTED)
+  {
+    delay(1000);
+    Serial.print(".");
   }
   Serial.println("");
   Serial.println("WiFi connected..!");
-  Serial.print("Got IP: ");  Serial.println(WiFi.localIP());
+  Serial.print("Got IP: ");
+  Serial.println(WiFi.localIP());
 
   server.on("/", handle_OnConnect);
   server.onNotFound(handle_NotFound);
@@ -51,46 +79,63 @@ void setup() {
   server.begin();
   Serial.println("HTTP server started");
 
-}
-void loop() {
+  lcd.begin(16, 2);
+  lcd.init();
+  lcd.backlight();
+  lcd.setCursor(0, 0);
+  lcd.print("Weather Station");
+  lcd.setCursor(2, 1);
+  lcd.print(WiFi.localIP());
+  delay(5000);
   
+}
+
+void loop()
+{
   server.handleClient();
-  
+  Temperature = dht.readTemperature(); // Gets the values of the temperature
+  Humidity = dht.readHumidity();       // Gets the values of the humidity
+  updateStats();
 }
 
-void handle_OnConnect() {
+void handle_OnConnect()
+{
 
- Temperature = dht.readTemperature(); // Gets the values of the temperature
-  Humidity = dht.readHumidity(); // Gets the values of the humidity 
-  server.send(200, "text/html", SendHTML(Temperature,Humidity)); 
+  // Temperature = dht.readTemperature(); // Gets the values of the temperature
+  // Humidity = dht.readHumidity();       // Gets the values of the humidity
+  server.send(200, "text/html", SendHTML(Temperature, Humidity));
+  // Serial.println(Temperature);
+  // Serial.println(Humidity);
 }
 
-void handle_NotFound(){
+void handle_NotFound()
+{
   server.send(404, "text/plain", "Not found");
 }
 
-String SendHTML(float Temperaturestat,float Humiditystat){
+String SendHTML(float Temperaturestat, float Humiditystat)
+{
   String ptr = "<!DOCTYPE html> <html>\n";
-  ptr +="<head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, user-scalable=no\">\n";
-  ptr +="<title>ESP8266 Weather Report</title>\n";
-  ptr +="<style>html { font-family: Helvetica; display: inline-block; margin: 0px auto; text-align: center;}\n";
-  ptr +="body{margin-top: 50px;} h1 {color: #444444;margin: 50px auto 30px;}\n";
-  ptr +="p {font-size: 24px;color: #444444;margin-bottom: 10px;}\n";
-  ptr +="</style>\n";
-  ptr +="</head>\n";
-  ptr +="<body>\n";
-  ptr +="<div id=\"webpage\">\n";
-  ptr +="<h1>ESP8266 NodeMCU Weather Report</h1>\n";
-  
-  ptr +="<p>Temperature: ";
-  ptr +=(int)Temperaturestat;
-  ptr +="°C</p>";
-  ptr +="<p>Humidity: ";
-  ptr +=(int)Humiditystat;
-  ptr +="%</p>";
-  
-  ptr +="</div>\n";
-  ptr +="</body>\n";
-  ptr +="</html>\n";
+  ptr += "<head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, user-scalable=no\">\n";
+  ptr += "<title>ESP8266 Weather Report</title>\n";
+  ptr += "<style>html { font-family: Helvetica; display: inline-block; margin: 0px auto; text-align: center;}\n";
+  ptr += "body{margin-top: 50px;} h1 {color: #444444;margin: 50px auto 30px;}\n";
+  ptr += "p {font-size: 24px;color: #444444;margin-bottom: 10px;}\n";
+  ptr += "</style>\n";
+  ptr += "</head>\n";
+  ptr += "<body>\n";
+  ptr += "<div id=\"webpage\">\n";
+  ptr += "<h1>ESP8266 NodeMCU Weather Report</h1>\n";
+
+  ptr += "<p>Temperature: ";
+  ptr += (int)Temperaturestat;
+  ptr += "°C</p>";
+  ptr += "<p>Humidity: ";
+  ptr += (int)Humiditystat;
+  ptr += "%</p>";
+
+  ptr += "</div>\n";
+  ptr += "</body>\n";
+  ptr += "</html>\n";
   return ptr;
 }
