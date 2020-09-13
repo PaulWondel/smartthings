@@ -16,6 +16,8 @@ LiquidCrystal_I2C lcd(0x27, 16, 2);
 /*Put your SSID & Password*/
 const char *ssid = "SamsungS8";    // Enter SSID here
 const char *password = "yiwk1234"; //Enter Password here
+// const char *ssid = "Tesla IoT";    // Enter SSID here
+// const char *password = "fsL6HgjN"; //Enter Password here
 
 //Your Domain name with URL path or IP address with path
 const char *serverName = "https://espweatherstation.000webhostapp.com/esp-post-data.php";
@@ -27,6 +29,7 @@ String sensorName = "DHT22";
 String sensorLocation = "Home";
 
 ESP8266WebServer server(80);
+
 
 // DHT Sensor
 uint8_t DHTPin = D5;
@@ -47,7 +50,6 @@ unsigned long timerDelay = 30000;
 
 void updateStats()
 {
-  lcd.clear();
   lcd.setCursor(0, 0);
   lcd.print("Temperature:");
 
@@ -68,6 +70,10 @@ void updateStats()
 
 void setup()
 {
+  lcd.begin(16, 2);
+  lcd.init();
+  lcd.backlight();
+
   Serial.begin(115200);
   delay(100);
 
@@ -98,14 +104,12 @@ void setup()
   server.begin();
   Serial.println("HTTP server started");
 
-  lcd.begin(16, 2);
-  lcd.init();
-  lcd.backlight();
   lcd.setCursor(0, 0);
   lcd.print("Weather Station");
-  lcd.setCursor(2, 1);
+  lcd.setCursor(0, 1);
   lcd.print(WiFi.localIP());
   delay(5000);
+  lcd.clear();
 }
 
 void loop()
@@ -115,84 +119,60 @@ void loop()
   Humidity = dht.readHumidity();       // Gets the values of the humidity
   updateStats();
 
-  if (WiFi.status() == WL_CONNECTED)
-  { //Check WiFi connection status
-
-    HTTPClient http; //Declare object of class HTTPClient
-
-    http.begin("espweatherstation.000webhostapp.com/esp-post-data.php"); //Specify request destination
-    http.addHeader("Content-Type", "text/plain");                        //Specify content-type header
-
-    int httpCode = http.POST("Message from ESP8266"); //Send the request
-    String payload = http.getString();                //Get the response payload
-
-    Serial.println(httpCode); //Print HTTP return code
-    Serial.println(payload);  //Print request response payload
-
-    http.end(); //Close connection
-  }
-  else
+  //Send an HTTP POST request every 10 minutes
+  if ((millis() - lastTime) > timerDelay)
   {
+    //Check WiFi connection status
+    if (WiFi.status() == WL_CONNECTED)
+    {
+      HTTPClient http;
 
-    Serial.println("Error in WiFi connection");
+      // Your Domain name with URL path or IP address with path
+      http.begin(serverName);
+
+      // Specify content-type header
+      http.addHeader("Content-Type", "application/x-www-form-urlencoded");
+
+      // Prepare your HTTP POST request data
+      String httpRequestData = "api_key=" + apiKeyValue + "&sensor=" + sensorName + "&location=" + sensorLocation + "&value1=" + String(dht.readTemperature()) + "&value2=" + String(dht.readHumidity()) + "&value3=" + String(/*bme.readPressure()*/ 1 / 100.0F) + "";
+      // String httpRequestData = "api_key=Bj4mXo9xpJtd2D&sensor=BME280&location=Office&value1=24.75&value2=49.54&value3=1005.14";
+      Serial.print("httpRequestData: ");
+      Serial.println(httpRequestData);
+
+      // You can comment the httpRequestData variable above
+      // then, use the httpRequestData variable below (for testing purposes without the BME280 sensor)
+      //String httpRequestData = "api_key=tPmAT5Ab3j7F9&sensor=BME280&location=Office&value1=24.75&value2=49.54&value3=1005.14";
+
+      // Send HTTP POST request
+      int httpResponseCode = http.POST(httpRequestData);
+
+      // If you need an HTTP request with a content type: text/plain
+      //http.addHeader("Content-Type", "text/plain");
+      //int httpResponseCode = http.POST("Hello, World!");
+
+      // If you need an HTTP request with a content type: application/json, use the following:
+      //http.addHeader("Content-Type", "application/json");
+      //int httpResponseCode = http.POST("{\"value1\":\"19\",\"value2\":\"67\",\"value3\":\"78\"}");
+
+      if (httpResponseCode > 0)
+      {
+        Serial.print("HTTP Response code: ");
+        Serial.println(httpResponseCode);
+      }
+      else
+      {
+        Serial.print("Error code: ");
+        Serial.println(httpResponseCode);
+      }
+      // Free resources
+      http.end();
+    }
+    else
+    {
+      Serial.println("WiFi Disconnected");
+    }
+    lastTime = millis();
   }
-
-  delay(30000); //Send a request every 30 seconds
-
-  // //Send an HTTP POST request every 10 minutes
-  // if ((millis() - lastTime) > timerDelay)
-  // {
-  //   //Check WiFi connection status
-  //   if (WiFi.status() == WL_CONNECTED)
-  //   {
-  //     HTTPClient http;
-
-  //     // Your Domain name with URL path or IP address with path
-  //     http.begin(serverName);
-
-  //     // Specify content-type header
-  //     http.addHeader("Content-Type", "application/x-www-form-urlencoded");
-
-  //     // Prepare your HTTP POST request data
-  //     // String httpRequestData = "api_key=" + apiKeyValue + "&sensor=" + sensorName + "&location=" + sensorLocation + "&value1=" + String(dht.readTemperature()) + "&value2=" + String(dht.readHumidity()) + "&value3=" + String(/*bme.readPressure()*/ 1 / 100.0F) + "";
-  //     String httpRequestData = "api_key=Bj4mXo9xpJtd2D&sensor=BME280&location=Office&value1=24.75&value2=49.54&value3=1005.14";
-  //     Serial.print("httpRequestData: ");
-  //     Serial.println(httpRequestData);
-
-  //     // You can comment the httpRequestData variable above
-  //     // then, use the httpRequestData variable below (for testing purposes without the BME280 sensor)
-  //     //String httpRequestData = "api_key=tPmAT5Ab3j7F9&sensor=BME280&location=Office&value1=24.75&value2=49.54&value3=1005.14";
-
-  //     // Send HTTP POST request
-  //     int httpResponseCode = http.POST(httpRequestData);
-
-  //     // If you need an HTTP request with a content type: text/plain
-  //     //http.addHeader("Content-Type", "text/plain");
-  //     //int httpResponseCode = http.POST("Hello, World!");
-
-  //     // If you need an HTTP request with a content type: application/json, use the following:
-  //     //http.addHeader("Content-Type", "application/json");
-  //     //int httpResponseCode = http.POST("{\"value1\":\"19\",\"value2\":\"67\",\"value3\":\"78\"}");
-
-  //     if (httpResponseCode > 0)
-  //     {
-  //       Serial.print("HTTP Response code: ");
-  //       Serial.println(httpResponseCode);
-  //     }
-  //     else
-  //     {
-  //       Serial.print("Error code: ");
-  //       Serial.println(httpResponseCode);
-  //     }
-  //     // Free resources
-  //     http.end();
-  //   }
-  //   else
-  //   {
-  //     Serial.println("WiFi Disconnected");
-  //   }
-  //   lastTime = millis();
-  // }
 }
 
 void handle_OnConnect()
