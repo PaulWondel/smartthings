@@ -2,6 +2,8 @@
 #include <ESP8266WebServer.h>
 #include "DHT.h"
 #include <LiquidCrystal_I2C.h>
+#include <ESP8266HTTPClient.h>
+#include <WiFiClient.h>
 
 // set the LCD address to 0x27 for a 16 chars and 2 line display
 LiquidCrystal_I2C lcd(0x27, 16, 2);
@@ -15,6 +17,15 @@ LiquidCrystal_I2C lcd(0x27, 16, 2);
 const char *ssid = "SamsungS8";    // Enter SSID here
 const char *password = "yiwk1234"; //Enter Password here
 
+//Your Domain name with URL path or IP address with path
+const char *serverName = "https://espweatherstation.000webhostapp.com/esp-post-data.php";
+
+// Keep this API Key value to be compatible with the PHP code provided in the project page.
+// If you change the apiKeyValue value, the PHP file /esp-post-data.php also needs to have the same key
+String apiKeyValue = "Bj4mXo9xpJtd2D";
+String sensorName = "DHT22";
+String sensorLocation = "Home";
+
 ESP8266WebServer server(80);
 
 // DHT Sensor
@@ -25,6 +36,14 @@ DHT dht(DHTPin, DHTTYPE);
 
 float Temperature;
 float Humidity;
+
+// the following variables are unsigned longs because the time, measured in
+// milliseconds, will quickly become a bigger number than can be stored in an int.
+unsigned long lastTime = 0;
+// Timer set to 10 minutes (600000)
+//unsigned long timerDelay = 600000;
+// Set timer to 30 seconds (30000)
+unsigned long timerDelay = 30000;
 
 void updateStats()
 {
@@ -87,7 +106,6 @@ void setup()
   lcd.setCursor(2, 1);
   lcd.print(WiFi.localIP());
   delay(5000);
-  
 }
 
 void loop()
@@ -96,6 +114,85 @@ void loop()
   Temperature = dht.readTemperature(); // Gets the values of the temperature
   Humidity = dht.readHumidity();       // Gets the values of the humidity
   updateStats();
+
+  if (WiFi.status() == WL_CONNECTED)
+  { //Check WiFi connection status
+
+    HTTPClient http; //Declare object of class HTTPClient
+
+    http.begin("espweatherstation.000webhostapp.com/esp-post-data.php"); //Specify request destination
+    http.addHeader("Content-Type", "text/plain");                        //Specify content-type header
+
+    int httpCode = http.POST("Message from ESP8266"); //Send the request
+    String payload = http.getString();                //Get the response payload
+
+    Serial.println(httpCode); //Print HTTP return code
+    Serial.println(payload);  //Print request response payload
+
+    http.end(); //Close connection
+  }
+  else
+  {
+
+    Serial.println("Error in WiFi connection");
+  }
+
+  delay(30000); //Send a request every 30 seconds
+
+  // //Send an HTTP POST request every 10 minutes
+  // if ((millis() - lastTime) > timerDelay)
+  // {
+  //   //Check WiFi connection status
+  //   if (WiFi.status() == WL_CONNECTED)
+  //   {
+  //     HTTPClient http;
+
+  //     // Your Domain name with URL path or IP address with path
+  //     http.begin(serverName);
+
+  //     // Specify content-type header
+  //     http.addHeader("Content-Type", "application/x-www-form-urlencoded");
+
+  //     // Prepare your HTTP POST request data
+  //     // String httpRequestData = "api_key=" + apiKeyValue + "&sensor=" + sensorName + "&location=" + sensorLocation + "&value1=" + String(dht.readTemperature()) + "&value2=" + String(dht.readHumidity()) + "&value3=" + String(/*bme.readPressure()*/ 1 / 100.0F) + "";
+  //     String httpRequestData = "api_key=Bj4mXo9xpJtd2D&sensor=BME280&location=Office&value1=24.75&value2=49.54&value3=1005.14";
+  //     Serial.print("httpRequestData: ");
+  //     Serial.println(httpRequestData);
+
+  //     // You can comment the httpRequestData variable above
+  //     // then, use the httpRequestData variable below (for testing purposes without the BME280 sensor)
+  //     //String httpRequestData = "api_key=tPmAT5Ab3j7F9&sensor=BME280&location=Office&value1=24.75&value2=49.54&value3=1005.14";
+
+  //     // Send HTTP POST request
+  //     int httpResponseCode = http.POST(httpRequestData);
+
+  //     // If you need an HTTP request with a content type: text/plain
+  //     //http.addHeader("Content-Type", "text/plain");
+  //     //int httpResponseCode = http.POST("Hello, World!");
+
+  //     // If you need an HTTP request with a content type: application/json, use the following:
+  //     //http.addHeader("Content-Type", "application/json");
+  //     //int httpResponseCode = http.POST("{\"value1\":\"19\",\"value2\":\"67\",\"value3\":\"78\"}");
+
+  //     if (httpResponseCode > 0)
+  //     {
+  //       Serial.print("HTTP Response code: ");
+  //       Serial.println(httpResponseCode);
+  //     }
+  //     else
+  //     {
+  //       Serial.print("Error code: ");
+  //       Serial.println(httpResponseCode);
+  //     }
+  //     // Free resources
+  //     http.end();
+  //   }
+  //   else
+  //   {
+  //     Serial.println("WiFi Disconnected");
+  //   }
+  //   lastTime = millis();
+  // }
 }
 
 void handle_OnConnect()
@@ -125,7 +222,7 @@ String SendHTML(float Temperaturestat, float Humiditystat)
   ptr += "</head>\n";
   ptr += "<body>\n";
   ptr += "<div id=\"webpage\">\n";
-  ptr += "<h1>ESP8266 NodeMCU Weather Report</h1>\n";
+  ptr += "<h1>ESP8266 Home Weather Station</h1>\n";
 
   ptr += "<p>Temperature: ";
   ptr += (int)Temperaturestat;
