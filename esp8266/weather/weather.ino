@@ -78,6 +78,15 @@ void updateStats()
   delay(1000);
 }
 
+void searchMesg()
+{
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("Searching for a");
+  lcd.setCursor(0, 1);
+  lcd.print("WiFi Connection");
+}
+
 void errorMesg()
 {
   lcd.clear();
@@ -113,10 +122,7 @@ void setup()
   {
     delay(1000);
     Serial.print(".");
-    lcd.setCursor(0, 0);
-    lcd.print("Searching for a");
-    lcd.setCursor(0, 1);
-    lcd.print("WiFi Connection");
+    searchMesg();
   }
   Serial.println("");
   Serial.println("WiFi connected..!");
