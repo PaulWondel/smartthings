@@ -30,6 +30,8 @@ String sensorLocation = "Home";
 
 ESP8266WebServer server(80);
 
+const int buttonPin = D6;
+int buttonState = LOW; 
 
 // DHT Sensor
 uint8_t DHTPin = D5;
@@ -65,7 +67,7 @@ void updateStats()
   lcd.print((int)Humidity);
   lcd.setCursor(15, 1);
   lcd.print("%");
-  delay(2000);
+  // delay(2000);
 }
 
 void setup()
@@ -73,11 +75,13 @@ void setup()
   lcd.begin(16, 2);
   lcd.init();
   lcd.backlight();
+  lcd.display();
 
   Serial.begin(115200);
   delay(100);
 
   pinMode(DHTPin, INPUT);
+  pinMode(buttonPin, INPUT);
 
   dht.begin();
 
@@ -114,6 +118,17 @@ void setup()
 
 void loop()
 {
+  // int reading = digitalRead(buttonPin);
+  // if (reading != buttonState){
+  //   Serial.println("Turn Display off");
+  //   // lcd.noBacklight();
+  //   lcd.noDisplay();
+  // }else{
+  //   Serial.println("Turn Display on");
+  //   // lcd.backlight();
+  //   lcd.display();
+  // }
+
   server.handleClient();
   Temperature = dht.readTemperature(); // Gets the values of the temperature
   Humidity = dht.readHumidity();       // Gets the values of the humidity
