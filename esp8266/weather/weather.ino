@@ -50,6 +50,14 @@ unsigned long lastTime = 0;
 // Set timer to 30 seconds (30000)
 unsigned long timerDelay = 30000;
 
+void initDisplay()
+{
+  lcd.begin(16, 2);
+  lcd.init();
+  lcd.backlight();
+  lcd.display();
+}
+
 void updateStats()
 {
   lcd.setCursor(0, 0);
@@ -83,10 +91,8 @@ void errorMesg()
 
 void setup()
 {
-  lcd.begin(16, 2);
-  lcd.init();
-  lcd.backlight();
-  lcd.display();
+  initDisplay();
+  lcd.printstr("Starting up.....");
 
   Serial.begin(115200);
   delay(100);
