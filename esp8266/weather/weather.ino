@@ -67,7 +67,7 @@ void updateStats()
   lcd.print((int)Humidity);
   lcd.setCursor(15, 1);
   lcd.print("%");
-  // delay(2000);
+  delay(400);
 }
 
 void setup()
