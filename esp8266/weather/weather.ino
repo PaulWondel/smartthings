@@ -31,7 +31,7 @@ String sensorLocation = "Home";
 ESP8266WebServer server(80);
 
 const int buttonPin = D6;
-int buttonState = LOW; 
+int buttonState = LOW;
 
 // DHT Sensor
 uint8_t DHTPin = D5;
@@ -67,7 +67,18 @@ void updateStats()
   lcd.print((int)Humidity);
   lcd.setCursor(15, 1);
   lcd.print("%");
-  delay(400);
+  delay(1000);
+}
+
+void errorMesg()
+{
+  lcd.clear();
+  lcd.setCursor(5,0);
+  lcd.print("Wi-Fi");
+  lcd.setCursor(3,1);
+  lcd.print("Disconnected");
+  delay(2000);
+  lcd.clear();
 }
 
 void setup()
@@ -112,7 +123,7 @@ void setup()
   lcd.print("Weather Station");
   lcd.setCursor(0, 1);
   lcd.print(WiFi.localIP());
-  delay(5000);
+  delay(3000);
   lcd.clear();
 }
 
@@ -185,6 +196,7 @@ void loop()
     else
     {
       Serial.println("WiFi Disconnected");
+      errorMesg();
     }
     lastTime = millis();
   }
