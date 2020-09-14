@@ -73,9 +73,9 @@ void updateStats()
 void errorMesg()
 {
   lcd.clear();
-  lcd.setCursor(5,0);
+  lcd.setCursor(6, 0);
   lcd.print("Wi-Fi");
-  lcd.setCursor(3,1);
+  lcd.setCursor(2, 1);
   lcd.print("Disconnected");
   delay(2000);
   lcd.clear();
@@ -107,6 +107,10 @@ void setup()
   {
     delay(1000);
     Serial.print(".");
+    lcd.setCursor(0, 0);
+    lcd.print("Searching for a");
+    lcd.setCursor(0, 1);
+    lcd.print("WiFi Connection");
   }
   Serial.println("");
   Serial.println("WiFi connected..!");
@@ -119,6 +123,7 @@ void setup()
   server.begin();
   Serial.println("HTTP server started");
 
+  lcd.clear();
   lcd.setCursor(0, 0);
   lcd.print("Weather Station");
   lcd.setCursor(0, 1);
