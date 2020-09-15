@@ -134,7 +134,8 @@ void sendHTTP()
 
     http.addHeader("Content-Type", "application/x-www-form-urlencoded");
     // String httpRequestData = "api_key=" + apiKeyValue + "&sensor=" + sensorName + "&location=" + sensorLocation + "&value1=" + String(dht.readTemperature()) + "&value2=" + String(dht.readHumidity()) + "&value3=" + String(0) + "";
-    String httpRequestData = "api_key=" + apiKey + "&field1=" + String(random(40));
+    // String httpRequestData = "api_key=" + apiKey + "&field1=" + String(random(40));
+    String httpRequestData = "api_key=" + apiKey + "&field1=" + Temperature + "&field2=" + fahrn(Temperature) + "&field3=" + Humidity;
     int httpResponseCode = http.POST(httpRequestData);
 
     if (httpResponseCode > 0)
@@ -154,6 +155,14 @@ void sendHTTP()
     Serial.println("WiFi Disconnected");
     errorMesg();
   }
+}
+
+// Celsius to Fahrenheit formula, F = C * 1.8 + 32
+float fahrn(float temperature)
+{
+  float farh = temperature * 1.8;
+  farh = farh + 32;
+  return farh;
 }
 
 void initDisplay()

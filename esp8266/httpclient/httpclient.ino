@@ -1,3 +1,5 @@
+/*  Works well with Thing Speak server */
+
 #include <ESP8266WiFi.h>
 #include <ESP8266HTTPClient.h>
 #include <WiFiClient.h>
@@ -9,12 +11,14 @@ LiquidCrystal_I2C lcd(0x27, 16, 2);
 
 // Uncomment one of the lines below for whatever DHT sensor type you're using!
 #define DHTTYPE DHT11 // DHT 11
+//#define DHTTYPE DHT22   // DHT 22
 
 const char *ssid = "";         // Enter SSID here
 const char *password = ""; //Enter Password here
 
 // Domain Name with full URL Path for HTTP POST Request
-const char *serverName = "http://api.thingspeak.com/update";
+// const char *serverName = "api.thingspeak.com/update";
+const char *serverName = "https://espweatherstation.000webhostapp.com/esp-post-data.php";
 // Service API Key
 String apiKey = "C7H8P0DJA9KCCJ3B";
 
@@ -68,9 +72,6 @@ void setup()
 
     Serial.println("Timer set to 10 seconds (timerDelay variable), it will take 10 seconds before publishing the first reading.");
 
-    // Random seed is a number used to initialize a pseudorandom number generator
-    randomSeed(analogRead(0));
-
     lcd.clear();
     lcd.setCursor(0, 0);
     lcd.print("Weather Station");
@@ -99,7 +100,8 @@ void loop()
             // Specify content-type header
             http.addHeader("Content-Type", "application/x-www-form-urlencoded");
             // Data to send with HTTP POST
-            String httpRequestData = "api_key=" + apiKey + "&field1=" + Temperature + "&field2=" + fahrn(Temperature) + "&field3=" + Humidity;
+            String httpRequestData = "api_key=" + apiKeyValue + "&sensor=" + sensorName + "&location=" + sensorLocation + "&value1=" + String(dht.readTemperature()) + "&value2=" + String(dht.readHumidity()) + "&value3=" + String(0) + "";
+            // String httpRequestData = "api_key=" + apiKey + "&field1=" + Temperature + "&field2=" + fahrn(Temperature) + "&field3=" + Humidity;
             // Send HTTP POST request
             int httpResponseCode = http.POST(httpRequestData);
 
@@ -150,7 +152,6 @@ void updateStats()
     lcd.print((int)Humidity);
     lcd.setCursor(15, 1);
     lcd.print("%");
-    // delay(1000);
 }
 
 void searchMesg()
