@@ -22,8 +22,6 @@ const char *password = ""; //Enter Password here
 
 //Your Domain name with URL path or IP address with path
 const char *serverName = "http://espweatherstation.000webhostapp.com/esp-post-data.php";
-// const char *serverName = "api.thingspeak.com/update";
-String apiKey = "C7H8P0DJA9KCCJ3B";
 
 // Keep this API Key value to be compatible with the PHP code provided in the project page.
 // If you change the apiKeyValue value, the PHP file /esp-post-data.php also needs to have the same key
@@ -147,8 +145,6 @@ void sendHTTP()
     String httpRequestData = "api_key=" + apiKeyValue + "&sensor=" + sensorName + "&location=" + sensorLocation
         + "&value1=" + String(dht.readTemperature()) + "&value2=" + String(dht.readHumidity()) 
         + "&value3=" + String(fahrn(dht.readTemperature())) + "";
-    // String httpRequestData = "api_key=" + apiKey + "&field1=" + String(random(40));
-    // String httpRequestData = "api_key=" + apiKey + "&field1=" + Temperature + "&field2=" + fahrn(Temperature) + "&field3=" + Humidity;
     int httpResponseCode = http.POST(httpRequestData);
 
     if (httpResponseCode > 0)
@@ -253,8 +249,6 @@ void handle_OnConnect()
   // Temperature = dht.readTemperature(); // Gets the values of the temperature
   // Humidity = dht.readHumidity();       // Gets the values of the humidity
   webServer.send(200, "text/html", SendHTML(Temperature, Humidity));
-  // Serial.println(Temperature);
-  // Serial.println(Humidity);
 }
 
 void handle_NotFound()
