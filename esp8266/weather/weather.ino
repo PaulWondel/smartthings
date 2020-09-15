@@ -97,6 +97,8 @@ void setup()
   lcd.print(WiFi.localIP());
   delay(3000);
   lcd.clear();
+  
+  sendHTTP();
 }
 
 void loop()
@@ -112,17 +114,18 @@ void loop()
   //   lcd.display();
   // }
 
+  Temperature = dht.readTemperature(); // Gets the values of the temperature
+  Humidity = dht.readHumidity();       // Gets the values of the humidity
+
   webServer.handleClient();
   //Send an HTTP POST request every 10 minutes
   if ((millis() - lastTime) > timerDelay)
   {
-    Temperature = dht.readTemperature(); // Gets the values of the temperature
-    Humidity = dht.readHumidity();       // Gets the values of the humidity
-    updateStats();
     sendHTTP();
 
     lastTime = millis();
   }
+  updateStats();
 }
 
 void sendHTTP()
@@ -147,12 +150,13 @@ void sendHTTP()
     {
       Serial.print("Error code: ");
       Serial.println(httpResponseCode);
+      errorSiteMesg();
     }
     http.end();
   }
   else
   {
-    Serial.println("WiFi Disconnected");
+    Serial.println("Wi-Fi Disconnected");
     errorMesg();
   }
 }
@@ -199,7 +203,7 @@ void searchMesg()
   lcd.setCursor(0, 0);
   lcd.print("Searching for a");
   lcd.setCursor(0, 1);
-  lcd.print("WiFi Connection");
+  lcd.print("Wi-Fi Connection");
 }
 
 void errorMesg()
@@ -210,6 +214,17 @@ void errorMesg()
   lcd.setCursor(2, 1);
   lcd.print("Disconnected");
   delay(2000);
+  lcd.clear();
+}
+
+void errorSiteMesg()
+{
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("Error uploading");
+  lcd.setCursor(0, 1);
+  lcd.print("to website");
+  delay(10000);
   lcd.clear();
 }
 
