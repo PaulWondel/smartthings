@@ -1,8 +1,8 @@
+#include <ESP8266WiFi.h>
 #include <ESP8266WebServer.h>
-#include "DHT.h"
-#include <LiquidCrystal_I2C.h>
 #include <ESP8266HTTPClient.h>
-#include <WiFiClient.h>
+#include <LiquidCrystal_I2C.h>
+#include "DHT.h"
 
 // set the LCD address to 0x27 for a 16 chars and 2 line display
 LiquidCrystal_I2C lcd(0x27, 16, 2);
@@ -97,7 +97,7 @@ void setup()
   lcd.print(WiFi.localIP());
   delay(3000);
   lcd.clear();
-  
+
   sendHTTP();
 }
 
@@ -126,6 +126,14 @@ void loop()
     lastTime = millis();
   }
   updateStats();
+
+  // if (WiFi.status() != WL_CONNECTED)
+  // {
+  //   delay(1000);
+  //   Serial.println("Reconnecting to Wi-Fi");
+  //   WiFi.reconnect();
+  //   reconnectMesg();
+  // }
 }
 
 void sendHTTP()
@@ -136,7 +144,9 @@ void sendHTTP()
     http.begin(serverName);
 
     http.addHeader("Content-Type", "application/x-www-form-urlencoded");
-    String httpRequestData = "api_key=" + apiKeyValue + "&sensor=" + sensorName + "&location=" + sensorLocation + "&value1=" + String(dht.readTemperature()) + "&value2=" + String(dht.readHumidity()) + "&value3=" + String(0) + "";
+    String httpRequestData = "api_key=" + apiKeyValue + "&sensor=" + sensorName + "&location=" + sensorLocation
+        + "&value1=" + String(dht.readTemperature()) + "&value2=" + String(dht.readHumidity()) 
+        + "&value3=" + String(fahrn(dht.readTemperature())) + "";
     // String httpRequestData = "api_key=" + apiKey + "&field1=" + String(random(40));
     // String httpRequestData = "api_key=" + apiKey + "&field1=" + Temperature + "&field2=" + fahrn(Temperature) + "&field3=" + Humidity;
     int httpResponseCode = http.POST(httpRequestData);
@@ -202,6 +212,15 @@ void searchMesg()
   lcd.clear();
   lcd.setCursor(0, 0);
   lcd.print("Searching for a");
+  lcd.setCursor(0, 1);
+  lcd.print("Wi-Fi Connection");
+}
+
+void reconnectMesg()
+{
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("Reconnecting");
   lcd.setCursor(0, 1);
   lcd.print("Wi-Fi Connection");
 }

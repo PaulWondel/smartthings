@@ -25,6 +25,7 @@
     $last_reading = getLastReadings();
     $last_reading_temp = $last_reading["value1"];
     $last_reading_humi = $last_reading["value2"];
+    $last_reading_fahr = $last_reading["value3"];
     $last_reading_time = $last_reading["reading_time"];
 
     // Uncomment to set timezone to - 1 hour (you can change 1 to any number)
@@ -39,6 +40,10 @@
     $min_humi = minReading($readings_count, 'value2');
     $max_humi = maxReading($readings_count, 'value2');
     $avg_humi = avgReading($readings_count, 'value2');
+
+    $min_fahr = minReading($readings_count, 'value3');
+    $max_fahr = maxReading($readings_count, 'value3');
+    $avg_fahr = avgReading($readings_count, 'value3');
 ?>
 
 <!DOCTYPE html>
@@ -82,6 +87,29 @@
                 </tr>
             </table>
         </div>
+        <div class="box gauge--1">
+            <h3>TEMP FARHNHEIT</h3>
+            <div class="mask">
+                <div class="semi-circle"></div>
+                <div class="semi-circle--mask"></div>
+            </div>
+            <p style="font-size: 30px;" id="fahr">--</p>
+            <table cellspacing="5" cellpadding="5">
+                <tr>
+                    <th colspan="3">Fahrenheit <?php echo $readings_count; ?> readings</th>
+                </tr>
+                <tr>
+                    <td>Min</td>
+                    <td>Max</td>
+                    <td>Average</td>
+                </tr>
+                <tr>
+                    <td><?php echo $min_fahr['min_amount']; ?> &deg;F</td>
+                    <td><?php echo $max_fahr['max_amount']; ?> &deg;F</td>
+                    <td><?php echo round($avg_fahr['avg_amount'], 2); ?>&deg;F</td>
+                </tr>
+            </table>
+        </div>
         <div class="box gauge--2">
             <h3>HUMIDITY</h3>
             <div class="mask">
@@ -115,6 +143,7 @@
                     <th>Location</th>
                     <th>Temperature (°C)</th>
                     <th>Humidity (%)</th>
+                    <th>Temperature (°F)</th>
                     <th>Timestamp</th>
                 </tr>';
 
@@ -126,6 +155,7 @@
             $row_location = $row["location"];
             $row_value1 = $row["value1"];
             $row_value2 = $row["value2"];
+            $row_value3 = $row["value3"];
             $row_reading_time = $row["reading_time"];
             // Uncomment to set timezone to - 1 hour (you can change 1 to any number)
             //$row_reading_time = date("Y-m-d H:i:s", strtotime("$row_reading_time - 1 hours"));
@@ -138,6 +168,7 @@
                     <td>' . $row_location . '</td>
                     <td>' . $row_value1 . '</td>
                     <td>' . $row_value2 . '</td>
+                    <td>' . $row_value3 . '</td>
                     <td>' . $row_reading_time . '</td>
                   </tr>';
         }
@@ -149,8 +180,10 @@
 <script>
     var value1 = <?php echo $last_reading_temp; ?>;
     var value2 = <?php echo $last_reading_humi; ?>;
+    var value3 = <?php echo $last_reading_fahr; ?>;
     setTemperature(value1);
     setHumidity(value2);
+    setTempFahr(value3);
 
     function setTemperature(curVal){
     	//set range for Temperature in Celsius -5 Celsius to 38 Celsius
@@ -181,6 +214,23 @@
     		'transform: rotate(' + newVal + 'deg);'
     	});
     	$("#humi").text(curVal + ' %');
+    }
+
+    function setTempFahr(curVal){
+    	//set range for Temperature in Celsius -5 Celsius to 38 Celsius
+    	// var minTemp = -5.0;
+    	// var maxTemp = 38.0;
+        //set range for Temperature in Fahrenheit 23 Fahrenheit to 100 Fahrenheit
+    	var minTempFahr = 23;
+    	var maxTempFahr = 100;
+
+    	var newVal = scaleValue(curVal, [minTempFahr, maxTempFahr], [0, 180]);
+    	$('.gauge--1 .semi-circle--mask').attr({
+    		style: '-webkit-transform: rotate(' + newVal + 'deg);' +
+    		'-moz-transform: rotate(' + newVal + 'deg);' +
+    		'transform: rotate(' + newVal + 'deg);'
+    	});
+    	$("#fahr").text(curVal + ' ºF');
     }
 
     function scaleValue(value, from, to) {
