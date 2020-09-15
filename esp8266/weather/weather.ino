@@ -1,4 +1,3 @@
-#include <ESP8266WiFi.h>
 #include <ESP8266WebServer.h>
 #include "DHT.h"
 #include <LiquidCrystal_I2C.h>
@@ -14,21 +13,25 @@ LiquidCrystal_I2C lcd(0x27, 16, 2);
 //#define DHTTYPE DHT22   // DHT 22  (AM2302), AM2321
 
 /*Put your SSID & Password*/
-const char *ssid = "SamsungS8";    // Enter SSID here
-const char *password = "yiwk1234"; //Enter Password here
+// const char *ssid = "SamsungS8";    // Enter SSID here
+// const char *password = "yiwk1234"; //Enter Password here
 // const char *ssid = "Tesla IoT";    // Enter SSID here
 // const char *password = "fsL6HgjN"; //Enter Password here
+const char *ssid = "";         // Enter SSID here
+const char *password = ""; //Enter Password here
 
 //Your Domain name with URL path or IP address with path
-const char *serverName = "https://espweatherstation.000webhostapp.com/esp-post-data.php";
+// const char *serverName = "https://espweatherstation.000webhostapp.com/esp-post-data.php";
+const char *serverName = "api.thingspeak.com/update";
+String apiKey = "C7H8P0DJA9KCCJ3B";
 
 // Keep this API Key value to be compatible with the PHP code provided in the project page.
 // If you change the apiKeyValue value, the PHP file /esp-post-data.php also needs to have the same key
 String apiKeyValue = "Bj4mXo9xpJtd2D";
-String sensorName = "DHT22";
-String sensorLocation = "Home";
+String sensorName = "DHT11";
+String sensorLocation = "Living Room";
 
-ESP8266WebServer server(80);
+ESP8266WebServer webServer(80);
 
 const int buttonPin = D6;
 int buttonState = LOW;
@@ -48,55 +51,7 @@ unsigned long lastTime = 0;
 // Timer set to 10 minutes (600000)
 //unsigned long timerDelay = 600000;
 // Set timer to 30 seconds (30000)
-unsigned long timerDelay = 30000;
-
-void initDisplay()
-{
-  lcd.begin(16, 2);
-  lcd.init();
-  lcd.backlight();
-  lcd.display();
-}
-
-void updateStats()
-{
-  lcd.setCursor(0, 0);
-  lcd.print("Temperature:");
-
-  lcd.setCursor(13, 0);
-  lcd.print((int)Temperature);
-  lcd.setCursor(15, 0);
-  lcd.print("C");
-
-  lcd.setCursor(0, 1);
-  lcd.print("Humidity:");
-
-  lcd.setCursor(13, 1);
-  lcd.print((int)Humidity);
-  lcd.setCursor(15, 1);
-  lcd.print("%");
-  delay(1000);
-}
-
-void searchMesg()
-{
-  lcd.clear();
-  lcd.setCursor(0, 0);
-  lcd.print("Searching for a");
-  lcd.setCursor(0, 1);
-  lcd.print("WiFi Connection");
-}
-
-void errorMesg()
-{
-  lcd.clear();
-  lcd.setCursor(6, 0);
-  lcd.print("Wi-Fi");
-  lcd.setCursor(2, 1);
-  lcd.print("Disconnected");
-  delay(2000);
-  lcd.clear();
-}
+unsigned long timerDelay = 10000;
 
 void setup()
 {
@@ -129,10 +84,10 @@ void setup()
   Serial.print("Got IP: ");
   Serial.println(WiFi.localIP());
 
-  server.on("/", handle_OnConnect);
-  server.onNotFound(handle_NotFound);
+  webServer.on("/", handle_OnConnect);
+  webServer.onNotFound(handle_NotFound);
 
-  server.begin();
+  webServer.begin();
   Serial.println("HTTP server started");
 
   lcd.clear();
@@ -157,66 +112,96 @@ void loop()
   //   lcd.display();
   // }
 
-  server.handleClient();
-  Temperature = dht.readTemperature(); // Gets the values of the temperature
-  Humidity = dht.readHumidity();       // Gets the values of the humidity
-  updateStats();
-
+  webServer.handleClient();
   //Send an HTTP POST request every 10 minutes
   if ((millis() - lastTime) > timerDelay)
   {
-    //Check WiFi connection status
-    if (WiFi.status() == WL_CONNECTED)
+    Temperature = dht.readTemperature(); // Gets the values of the temperature
+    Humidity = dht.readHumidity();       // Gets the values of the humidity
+    updateStats();
+    sendHTTP();
+
+    lastTime = millis();
+  }
+}
+
+void sendHTTP()
+{
+  if (WiFi.status() == WL_CONNECTED)
+  {
+    HTTPClient http;
+    http.begin(serverName);
+
+    http.addHeader("Content-Type", "application/x-www-form-urlencoded");
+    // String httpRequestData = "api_key=" + apiKeyValue + "&sensor=" + sensorName + "&location=" + sensorLocation + "&value1=" + String(dht.readTemperature()) + "&value2=" + String(dht.readHumidity()) + "&value3=" + String(0) + "";
+    String httpRequestData = "api_key=" + apiKey + "&field1=" + String(random(40));
+    int httpResponseCode = http.POST(httpRequestData);
+
+    if (httpResponseCode > 0)
     {
-      HTTPClient http;
-
-      // Your Domain name with URL path or IP address with path
-      http.begin(serverName);
-
-      // Specify content-type header
-      http.addHeader("Content-Type", "application/x-www-form-urlencoded");
-
-      // Prepare your HTTP POST request data
-      String httpRequestData = "api_key=" + apiKeyValue + "&sensor=" + sensorName + "&location=" + sensorLocation + "&value1=" + String(dht.readTemperature()) + "&value2=" + String(dht.readHumidity()) + "&value3=" + String(/*bme.readPressure()*/ 1 / 100.0F) + "";
-      // String httpRequestData = "api_key=Bj4mXo9xpJtd2D&sensor=BME280&location=Office&value1=24.75&value2=49.54&value3=1005.14";
-      Serial.print("httpRequestData: ");
-      Serial.println(httpRequestData);
-
-      // You can comment the httpRequestData variable above
-      // then, use the httpRequestData variable below (for testing purposes without the BME280 sensor)
-      //String httpRequestData = "api_key=tPmAT5Ab3j7F9&sensor=BME280&location=Office&value1=24.75&value2=49.54&value3=1005.14";
-
-      // Send HTTP POST request
-      int httpResponseCode = http.POST(httpRequestData);
-
-      // If you need an HTTP request with a content type: text/plain
-      //http.addHeader("Content-Type", "text/plain");
-      //int httpResponseCode = http.POST("Hello, World!");
-
-      // If you need an HTTP request with a content type: application/json, use the following:
-      //http.addHeader("Content-Type", "application/json");
-      //int httpResponseCode = http.POST("{\"value1\":\"19\",\"value2\":\"67\",\"value3\":\"78\"}");
-
-      if (httpResponseCode > 0)
-      {
-        Serial.print("HTTP Response code: ");
-        Serial.println(httpResponseCode);
-      }
-      else
-      {
-        Serial.print("Error code: ");
-        Serial.println(httpResponseCode);
-      }
-      // Free resources
-      http.end();
+      Serial.print("HTTP Response code: ");
+      Serial.println(httpResponseCode);
     }
     else
     {
-      Serial.println("WiFi Disconnected");
-      errorMesg();
+      Serial.print("Error code: ");
+      Serial.println(httpResponseCode);
     }
-    lastTime = millis();
+    http.end();
   }
+  else
+  {
+    Serial.println("WiFi Disconnected");
+    errorMesg();
+  }
+}
+
+void initDisplay()
+{
+  lcd.begin(16, 2);
+  lcd.init();
+  lcd.backlight();
+  lcd.display();
+}
+
+void updateStats()
+{
+  lcd.setCursor(0, 0);
+  lcd.print("Temperature:");
+
+  lcd.setCursor(13, 0);
+  lcd.print((int)Temperature);
+  lcd.setCursor(15, 0);
+  lcd.print("C");
+
+  lcd.setCursor(0, 1);
+  lcd.print("Humidity:");
+
+  lcd.setCursor(13, 1);
+  lcd.print((int)Humidity);
+  lcd.setCursor(15, 1);
+  lcd.print("%");
+  // delay(1000);
+}
+
+void searchMesg()
+{
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("Searching for a");
+  lcd.setCursor(0, 1);
+  lcd.print("WiFi Connection");
+}
+
+void errorMesg()
+{
+  lcd.clear();
+  lcd.setCursor(6, 0);
+  lcd.print("Wi-Fi");
+  lcd.setCursor(2, 1);
+  lcd.print("Disconnected");
+  delay(2000);
+  lcd.clear();
 }
 
 void handle_OnConnect()
@@ -224,21 +209,21 @@ void handle_OnConnect()
 
   // Temperature = dht.readTemperature(); // Gets the values of the temperature
   // Humidity = dht.readHumidity();       // Gets the values of the humidity
-  server.send(200, "text/html", SendHTML(Temperature, Humidity));
+  webServer.send(200, "text/html", SendHTML(Temperature, Humidity));
   // Serial.println(Temperature);
   // Serial.println(Humidity);
 }
 
 void handle_NotFound()
 {
-  server.send(404, "text/plain", "Not found");
+  webServer.send(404, "text/plain", "Not found");
 }
 
 String SendHTML(float Temperaturestat, float Humiditystat)
 {
   String ptr = "<!DOCTYPE html> <html>\n";
   ptr += "<head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, user-scalable=no\">\n";
-  ptr += "<title>ESP8266 Weather Report</title>\n";
+  ptr += "<title>ESP8266 Weather Station Report</title>\n";
   ptr += "<style>html { font-family: Helvetica; display: inline-block; margin: 0px auto; text-align: center;}\n";
   ptr += "body{margin-top: 50px;} h1 {color: #444444;margin: 50px auto 30px;}\n";
   ptr += "p {font-size: 24px;color: #444444;margin-bottom: 10px;}\n";
