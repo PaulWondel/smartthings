@@ -21,8 +21,8 @@ const char *ssid = "";         // Enter SSID here
 const char *password = ""; //Enter Password here
 
 //Your Domain name with URL path or IP address with path
-// const char *serverName = "https://espweatherstation.000webhostapp.com/esp-post-data.php";
-const char *serverName = "api.thingspeak.com/update";
+const char *serverName = "http://espweatherstation.000webhostapp.com/esp-post-data.php";
+// const char *serverName = "api.thingspeak.com/update";
 String apiKey = "C7H8P0DJA9KCCJ3B";
 
 // Keep this API Key value to be compatible with the PHP code provided in the project page.
@@ -51,7 +51,7 @@ unsigned long lastTime = 0;
 // Timer set to 10 minutes (600000)
 //unsigned long timerDelay = 600000;
 // Set timer to 30 seconds (30000)
-unsigned long timerDelay = 10000;
+unsigned long timerDelay = 600000;
 
 void setup()
 {
@@ -133,9 +133,9 @@ void sendHTTP()
     http.begin(serverName);
 
     http.addHeader("Content-Type", "application/x-www-form-urlencoded");
-    // String httpRequestData = "api_key=" + apiKeyValue + "&sensor=" + sensorName + "&location=" + sensorLocation + "&value1=" + String(dht.readTemperature()) + "&value2=" + String(dht.readHumidity()) + "&value3=" + String(0) + "";
+    String httpRequestData = "api_key=" + apiKeyValue + "&sensor=" + sensorName + "&location=" + sensorLocation + "&value1=" + String(dht.readTemperature()) + "&value2=" + String(dht.readHumidity()) + "&value3=" + String(0) + "";
     // String httpRequestData = "api_key=" + apiKey + "&field1=" + String(random(40));
-    String httpRequestData = "api_key=" + apiKey + "&field1=" + Temperature + "&field2=" + fahrn(Temperature) + "&field3=" + Humidity;
+    // String httpRequestData = "api_key=" + apiKey + "&field1=" + Temperature + "&field2=" + fahrn(Temperature) + "&field3=" + Humidity;
     int httpResponseCode = http.POST(httpRequestData);
 
     if (httpResponseCode > 0)
