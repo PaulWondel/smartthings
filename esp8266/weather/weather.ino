@@ -144,6 +144,10 @@ void sendHTTP()
     {
       Serial.print("HTTP Response code: ");
       Serial.println(httpResponseCode);
+      if (httpResponseCode > 200)
+      {
+        errorSiteMesg();
+      }
     }
     else
     {
