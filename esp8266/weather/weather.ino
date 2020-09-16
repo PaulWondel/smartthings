@@ -1,33 +1,23 @@
 #include <ESP8266WiFi.h>
 #include <ESP8266WebServer.h>
 #include <ESP8266HTTPClient.h>
-#include <LiquidCrystal_I2C.h>
+
 #include "DHT.h"
 
-// set the LCD address to 0x27 for a 16 chars and 2 line display
-LiquidCrystal_I2C lcd(0x27, 16, 2);
+#include "httpclient.h"
+#include "lcd.h"
+// Make your own credentials.h file by using credentials_example.h
+#include "credentials.h"
 
 // Uncomment one of the lines below for whatever DHT sensor type you're using!
 #define DHTTYPE DHT11 // DHT 11
 //#define DHTTYPE DHT21   // DHT 21 (AM2301)
 //#define DHTTYPE DHT22   // DHT 22  (AM2302), AM2321
 
-/*Put your SSID & Password*/
-// const char *ssid = "SamsungS8";    // Enter SSID here
-// const char *password = "yiwk1234"; //Enter Password here
-// const char *ssid = "Tesla IoT";    // Enter SSID here
-// const char *password = "fsL6HgjN"; //Enter Password here
-const char *ssid = "";         // Enter SSID here
-const char *password = ""; //Enter Password here
-
-//Your Domain name with URL path or IP address with path
-const char *serverName = "http://espweatherstation.000webhostapp.com/esp-post-data.php";
-
-// Keep this API Key value to be compatible with the PHP code provided in the project page.
-// If you change the apiKeyValue value, the PHP file /esp-post-data.php also needs to have the same key
-String apiKeyValue = "Bj4mXo9xpJtd2D";
-String sensorName = "DHT11";
-String sensorLocation = "Living Room";
+// Network SSID
+const char *ssid = ssid_wifi;
+// Network's password for SSID
+const char *password = password_wifi;
 
 ESP8266WebServer webServer(80);
 
@@ -112,18 +102,20 @@ void loop()
   //   lcd.display();
   // }
 
-  Temperature = dht.readTemperature(); // Gets the values of the temperature
-  Humidity = dht.readHumidity();       // Gets the values of the humidity
+  // Gets the values of the temperature
+  Temperature = dht.readTemperature();
+  // Gets the values of the humidity
+  Humidity = dht.readHumidity();
 
   webServer.handleClient();
-  //Send an HTTP POST request every 10 minutes
+  //Send a HTTP POST request every 10 minutes
   if ((millis() - lastTime) > timerDelay)
   {
     sendHTTP();
 
     lastTime = millis();
   }
-  updateStats();
+  updateStats(Temperature, Humidity);
 
   // if (WiFi.status() != WL_CONNECTED)
   // {
@@ -134,6 +126,7 @@ void loop()
   // }
 }
 
+// Send a HTTP POST request
 void sendHTTP()
 {
   if (WiFi.status() == WL_CONNECTED)
@@ -175,87 +168,19 @@ float fahrn(float temperature)
   return farh;
 }
 
-void initDisplay()
-{
-  lcd.begin(16, 2);
-  lcd.init();
-  lcd.backlight();
-  lcd.display();
-}
-
-void updateStats()
-{
-  lcd.setCursor(0, 0);
-  lcd.print("Temperature:");
-
-  lcd.setCursor(13, 0);
-  lcd.print((int)Temperature);
-  lcd.setCursor(15, 0);
-  lcd.print("C");
-
-  lcd.setCursor(0, 1);
-  lcd.print("Humidity:");
-
-  lcd.setCursor(13, 1);
-  lcd.print((int)Humidity);
-  lcd.setCursor(15, 1);
-  lcd.print("%");
-  // delay(1000);
-}
-
-void searchMesg()
-{
-  lcd.clear();
-  lcd.setCursor(0, 0);
-  lcd.print("Searching for a");
-  lcd.setCursor(0, 1);
-  lcd.print("Wi-Fi Connection");
-}
-
-void reconnectMesg()
-{
-  lcd.clear();
-  lcd.setCursor(0, 0);
-  lcd.print("Reconnecting");
-  lcd.setCursor(0, 1);
-  lcd.print("Wi-Fi Connection");
-}
-
-void errorMesg()
-{
-  lcd.clear();
-  lcd.setCursor(6, 0);
-  lcd.print("Wi-Fi");
-  lcd.setCursor(2, 1);
-  lcd.print("Disconnected");
-  delay(2000);
-  lcd.clear();
-}
-
-void errorSiteMesg()
-{
-  lcd.clear();
-  lcd.setCursor(0, 0);
-  lcd.print("Error uploading");
-  lcd.setCursor(0, 1);
-  lcd.print("to website");
-  delay(10000);
-  lcd.clear();
-}
-
+// Update the values in the browser on point of connection of device to server
 void handle_OnConnect()
 {
-
-  // Temperature = dht.readTemperature(); // Gets the values of the temperature
-  // Humidity = dht.readHumidity();       // Gets the values of the humidity
   webServer.send(200, "text/html", SendHTML(Temperature, Humidity));
 }
 
+// Give error message if data not found
 void handle_NotFound()
 {
   webServer.send(404, "text/plain", "Not found");
 }
 
+// Send data of HTML page to webserver
 String SendHTML(float Temperaturestat, float Humiditystat)
 {
   String ptr = "<!DOCTYPE html> <html>\n";
