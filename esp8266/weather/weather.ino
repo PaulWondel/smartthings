@@ -41,6 +41,14 @@ unsigned long lastTime = 0;
 // Set timer to 30 seconds (30000)
 unsigned long timerDelay = 600000;
 
+// defines pins numbers
+const int trigPin = 13; //D7
+const int echoPin = 12; //D6
+
+// defines variables
+long duration;
+int distance;
+
 void setup()
 {
   initDisplay();
@@ -51,6 +59,8 @@ void setup()
 
   pinMode(DHTPin, INPUT);
   pinMode(buttonPin, INPUT);
+  pinMode(trigPin, OUTPUT); // Sets the trigPin as an Output
+  pinMode(echoPin, INPUT);  // Sets the echoPin as an Input
 
   dht.begin();
 
@@ -91,17 +101,6 @@ void setup()
 
 void loop()
 {
-  // int reading = digitalRead(buttonPin);
-  // if (reading != buttonState){
-  //   Serial.println("Turn Display off");
-  //   // lcd.noBacklight();
-  //   lcd.noDisplay();
-  // }else{
-  //   Serial.println("Turn Display on");
-  //   // lcd.backlight();
-  //   lcd.display();
-  // }
-
   // Gets the values of the temperature
   Temperature = dht.readTemperature();
   // Gets the values of the humidity
@@ -116,6 +115,7 @@ void loop()
     lastTime = millis();
   }
   updateStats(Temperature, Humidity);
+  screen();
 
   // if (WiFi.status() != WL_CONNECTED)
   // {
@@ -135,9 +135,7 @@ void sendHTTP()
     http.begin(serverName);
 
     http.addHeader("Content-Type", "application/x-www-form-urlencoded");
-    String httpRequestData = "api_key=" + apiKeyValue + "&sensor=" + sensorName + "&location=" + sensorLocation
-        + "&value1=" + String(dht.readTemperature()) + "&value2=" + String(dht.readHumidity()) 
-        + "&value3=" + String(fahrn(dht.readTemperature())) + "";
+    String httpRequestData = "api_key=" + apiKeyValue + "&sensor=" + sensorName + "&location=" + sensorLocation + "&value1=" + String(dht.readTemperature()) + "&value2=" + String(dht.readHumidity()) + "&value3=" + String(fahrn(dht.readTemperature())) + "";
     int httpResponseCode = http.POST(httpRequestData);
 
     if (httpResponseCode > 0)
@@ -210,4 +208,43 @@ String SendHTML(float Temperaturestat, float Humiditystat)
   ptr += "</body>\n";
   ptr += "</html>\n";
   return ptr;
+}
+
+void getDistance()
+{
+  // Clears the trigPin
+  digitalWrite(trigPin, LOW);
+  delayMicroseconds(2);
+
+  // Sets the trigPin on HIGH state for 10 micro seconds
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin, LOW);
+
+  // Reads the echoPin, returns the sound wave travel time in microseconds
+  duration = pulseIn(echoPin, HIGH);
+
+  // Calculating the distance
+  distance = duration * 0.034 / 2;
+  // Prints the distance on the Serial Monitor
+  Serial.print("Distance: ");
+  Serial.println(distance);
+  delay(400);
+}
+
+void screen()
+{
+  getDistance();
+  if (distance > 40)
+  {
+    Serial.println("Turn Display off");
+    // lcd.noBacklight();
+    lcd.noDisplay();
+  }
+  else
+  {
+    Serial.println("Turn Display on");
+    // lcd.backlight();
+    lcd.display();
+  }
 }
