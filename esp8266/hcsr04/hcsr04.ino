@@ -1,3 +1,13 @@
+#include "DHT.h"
+
+#define DHTTYPE DHT11 // DHT 11
+
+uint8_t DHTPin = 14;
+DHT dht(DHTPin, DHTTYPE);
+
+float Temperature;
+float Humidity;
+
 // defines pins numbers
 const int trigPin = 13; //D4
 const int echoPin = 12; //D3
@@ -8,9 +18,10 @@ int distance;
 
 void setup()
 {
+    pinMode(DHTPin, INPUT);
     pinMode(trigPin, OUTPUT); // Sets the trigPin as an Output
     pinMode(echoPin, INPUT);  // Sets the echoPin as an Input
-    Serial.begin(115200);       // Starts the serial communication
+    Serial.begin(115200);     // Starts the serial communication
 }
 
 void loop()
@@ -33,5 +44,10 @@ void loop()
     // Prints the distance on the Serial Monitor
     Serial.print("Distance: ");
     Serial.println(distance);
-    delay(400);
+
+    // // Gets the values of the temperature
+    // Serial.println(dht.readTemperature());
+    // // Gets the values of the humidity
+    // Serial.println(dht.readHumidity());
+    // delay(400);
 }

@@ -105,6 +105,9 @@ void loop()
   Temperature = dht.readTemperature();
   // Gets the values of the humidity
   Humidity = dht.readHumidity();
+  
+  Serial.println(Temperature);
+  Serial.println(Humidity);
 
   webServer.handleClient();
   //Send a HTTP POST request every 10 minutes
@@ -115,7 +118,7 @@ void loop()
     lastTime = millis();
   }
   updateStats(Temperature, Humidity);
-  screen();
+  // screen();
 
   // if (WiFi.status() != WL_CONNECTED)
   // {
