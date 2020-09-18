@@ -1,7 +1,7 @@
 # Here you will find the info to connect the pins in the circuit
 
 ## LCD to Arduino
-| LCD 128x64 | Ardunio UNO |
+| ST7920 LCD 128x64 | Ardunio UNO |
 |-|-|
 | GND | GND |
 | VCC | V5 |
