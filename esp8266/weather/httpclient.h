@@ -1,3 +1,7 @@
+/*
+/ In this file is the information of the website
+*/
+
 #include <ESP8266HTTPClient.h>
 
 //Your Domain name with URL path or IP address with path
