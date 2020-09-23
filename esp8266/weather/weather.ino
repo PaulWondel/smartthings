@@ -42,8 +42,7 @@ unsigned long lastTime = 0;
 unsigned long timerDelay = 600000;
 
 // defines pins numbers
-const int trigPin = 13; //D7
-const int echoPin = 12; //D6
+const int ProxSensor=A0;
 
 // defines variables
 long duration;
@@ -59,8 +58,7 @@ void setup()
 
   pinMode(DHTPin, INPUT);
   pinMode(buttonPin, INPUT);
-  pinMode(trigPin, OUTPUT); // Sets the trigPin as an Output
-  pinMode(echoPin, INPUT);  // Sets the echoPin as an Input
+  pinMode(ProxSensor,INPUT);
 
   dht.begin();
 
@@ -106,8 +104,8 @@ void loop()
   // Gets the values of the humidity
   Humidity = dht.readHumidity();
   
-  Serial.println(Temperature);
-  Serial.println(Humidity);
+  // Serial.println(Temperature);
+  // Serial.println(Humidity);
 
   webServer.handleClient();
   //Send a HTTP POST request every 10 minutes
@@ -118,7 +116,7 @@ void loop()
     lastTime = millis();
   }
   updateStats(Temperature, Humidity);
-  // screen();
+  screen();
 
   // if (WiFi.status() != WL_CONNECTED)
   // {
@@ -138,7 +136,7 @@ void sendHTTP()
     http.begin(serverName);
 
     http.addHeader("Content-Type", "application/x-www-form-urlencoded");
-    String httpRequestData = "api_key=" + apiKeyValue + "&sensor=" + sensorName + "&location=" + sensorLocation + "&value1=" + String(dht.readTemperature()) + "&value2=" + String(dht.readHumidity()) + "&value3=" + String(fahrn(dht.readTemperature())) + "";
+    String httpRequestData = "api_key=" + apiKeyValue + "&sensor=" + sensorName + "&location=" + sensorLocation + "&value1=" + String(dht.readTemperature()) + "&value2=" + String(dht.readHumidity()) + "&value3=" + String(dht.readTemperature(true)) + "";
     int httpResponseCode = http.POST(httpRequestData);
 
     if (httpResponseCode > 0)
@@ -163,14 +161,6 @@ void sendHTTP()
     Serial.println("Wi-Fi Disconnected");
     errorMesg();
   }
-}
-
-// Celsius to Fahrenheit formula, F = C * 1.8 + 32
-float fahrn(float temperature)
-{
-  float farh = temperature * 1.8;
-  farh = farh + 32;
-  return farh;
 }
 
 // Update the values in the browser on point of connection of device to server
@@ -213,41 +203,20 @@ String SendHTML(float Temperaturestat, float Humiditystat)
   return ptr;
 }
 
-void getDistance()
-{
-  // Clears the trigPin
-  digitalWrite(trigPin, LOW);
-  delayMicroseconds(2);
-
-  // Sets the trigPin on HIGH state for 10 micro seconds
-  digitalWrite(trigPin, HIGH);
-  delayMicroseconds(10);
-  digitalWrite(trigPin, LOW);
-
-  // Reads the echoPin, returns the sound wave travel time in microseconds
-  duration = pulseIn(echoPin, HIGH);
-
-  // Calculating the distance
-  distance = duration * 0.034 / 2;
-  // Prints the distance on the Serial Monitor
-  Serial.print("Distance: ");
-  Serial.println(distance);
-  delay(400);
-}
-
+// Turn display on and of if object is detected in front of weather station
 void screen()
 {
-  getDistance();
-  if (distance > 40)
+  long state = analogRead(ProxSensor);
+  if (state > 100)
   {
-    Serial.println("Turn Display off");
-    // lcd.noBacklight();
+    // Serial.println("Turn Display off");
+    lcd.noBacklight();
     lcd.noDisplay();
   }
   else
   {
-    Serial.println("Turn Display on");
-    // lcd.backlight();
+    // Serial.println("Turn Display on");
+    lcd.backlight();
     lcd.display();
   }
 }
