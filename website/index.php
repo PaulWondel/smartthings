@@ -31,7 +31,7 @@
     // Uncomment to set timezone to - 1 hour (you can change 1 to any number)
     //$last_reading_time = date("Y-m-d H:i:s", strtotime("$last_reading_time - 1 hours"));
     // Uncomment to set timezone to + 7 hours (you can change 7 to any number)
-    //$last_reading_time = date("Y-m-d H:i:s", strtotime("$last_reading_time + 7 hours"));
+    $last_reading_time = date("Y-m-d H:i:s", strtotime("$last_reading_time + 2 hours"));
 
     $min_temp = minReading($readings_count, 'value1');
     $max_temp = maxReading($readings_count, 'value1');
@@ -62,7 +62,8 @@
         </form>
     </header>
 <body>
-    <p>Last reading: <?php echo $last_reading_time; ?></p>
+    <p><b>Current time:</b> <?php echo date("Y-m-d H:i:s", strtotime("+ 2 hours")) ."\n"; ?></p>
+    <p><b>Last reading:</b> <?php echo $last_reading_time; ?></p>
     <section class="content">
 	    <div class="box gauge--1">
 	    <h3>TEMPERATURE</h3>
@@ -160,7 +161,7 @@
             // Uncomment to set timezone to - 1 hour (you can change 1 to any number)
             //$row_reading_time = date("Y-m-d H:i:s", strtotime("$row_reading_time - 1 hours"));
             // Uncomment to set timezone to + 7 hours (you can change 7 to any number)
-            //$row_reading_time = date("Y-m-d H:i:s", strtotime("$row_reading_time + 7 hours"));
+            $row_reading_time = date("Y-m-d H:i:s", strtotime("$row_reading_time + 2 hours"));
 
             echo '<tr>
                     <td>' . $row_id . '</td>
