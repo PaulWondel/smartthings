@@ -117,14 +117,6 @@ void loop()
   }
   updateStats(Temperature, Humidity);
   screen();
-
-  // if (WiFi.status() != WL_CONNECTED)
-  // {
-  //   delay(1000);
-  //   Serial.println("Reconnecting to Wi-Fi");
-  //   WiFi.reconnect();
-  //   reconnectMesg();
-  // }
 }
 
 // Send a HTTP POST request
@@ -218,5 +210,6 @@ void screen()
     // Serial.println("Turn Display on");
     lcd.backlight();
     lcd.display();
+    delay(2000);
   }
 }
