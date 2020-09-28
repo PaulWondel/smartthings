@@ -56,6 +56,7 @@
     </head>
     <header class="header">
         <h1>📊 Paul's Home Weather Station</h1>
+        <p>Click this <?php echo "<a href=https://schetsboek.github.io/hr/map.html>link</a>" ?> to find more weather stations </p>
         <form method="get">
             <input type="number" name="readingsCount" min="1" placeholder="Number of readings (<?php echo $readings_count; ?>)">
             <input type="submit" value="UPDATE">
