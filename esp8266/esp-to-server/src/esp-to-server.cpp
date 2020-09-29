@@ -3,7 +3,7 @@
 #include <ESP8266WiFi.h>
 #include <ESP8266WebServer.h>
 #include <ESP8266HTTPClient.h>
-
+#include <SmartThings.h>
 #include "DHT.h"
 
 #include "httpclient.h"
@@ -22,9 +22,6 @@ const char *ssid = ssid_wifi;
 const char *password = password_wifi;
 
 ESP8266WebServer webServer(80);
-
-const int buttonPin = D6;
-int buttonState = LOW;
 
 // DHT Sensor
 uint8_t DHTPin = D5;
@@ -49,6 +46,11 @@ const int ProxSensor=A0;
 // defines variables
 long duration;
 int distance;
+
+// API settings
+API api;
+int weatherStationId = stationId;
+int studentId;
 
 // Send a HTTP POST request
 void sendHTTP()
@@ -87,7 +89,7 @@ void sendHTTP()
 }
 
 // Send data of HTML page to webserver
-String SendHTML(float Temperaturestat, float Humiditystat)
+String SendHTML(float Temperaturestat, float Humiditystat, float Fahrn)
 {
   String ptr = "<!DOCTYPE html> <html>\n";
   ptr += "<head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, user-scalable=no\">\n";
@@ -99,13 +101,20 @@ String SendHTML(float Temperaturestat, float Humiditystat)
   ptr += "</head>\n";
   ptr += "<body>\n";
   ptr += "<div id=\"webpage\">\n";
-  ptr += "<h1>ESP8266 Home Weather Station</h1>\n";
+  ptr += "<h1>Paul's Home Weather Station</h1>\n";
+  ptr += "<p>My website version <a href=https://espweatherstation.000webhostapp.com/>here</a>. </p>";
+  ptr += "<p>More weather stations <a href=https://schetsboek.github.io/hr/map.html>here</a>. </p>\n";
 
   ptr += "<p>Temperature: ";
-  ptr += (int)Temperaturestat;
-  ptr += "°C</p>";
+  ptr += (float)Temperaturestat;
+  ptr += "<span>&#176;</span>";
+  ptr += "C</p>";
+  ptr += "<p>Temperature: ";
+  ptr += (float)Fahrn;
+  ptr += "<span>&#176;</span>";
+  ptr += "F</p>";
   ptr += "<p>Humidity: ";
-  ptr += (int)Humiditystat;
+  ptr += (float)Humiditystat;
   ptr += "%</p>";
 
   ptr += "</div>\n";
@@ -117,7 +126,7 @@ String SendHTML(float Temperaturestat, float Humiditystat)
 // Update the values in the browser on point of connection of device to server
 void handle_OnConnect()
 {
-  webServer.send(200, "text/html", SendHTML(Temperature, Humidity));
+  webServer.send(200, "text/html", SendHTML(dht.readTemperature(), dht.readHumidity(), dht.readTemperature(true)));
 }
 
 // Give error message if data not found
@@ -145,6 +154,13 @@ void screen()
   }
 }
 
+// Send data to the API 
+void sendToAPI(){
+  api.postWeatherData("Humidity", dht.readHumidity(), weatherStationId);
+  api.postWeatherData("Temperature", dht.readTemperature(), weatherStationId);
+  Serial.println("Data successfully sent to API");
+}
+
 void setup()
 {
   initDisplay();
@@ -154,7 +170,6 @@ void setup()
   delay(100);
 
   pinMode(DHTPin, INPUT);
-  pinMode(buttonPin, INPUT);
   pinMode(ProxSensor,INPUT);
 
   dht.begin();
@@ -192,6 +207,9 @@ void setup()
   lcd.clear();
 
   sendHTTP();
+
+  studentId = api.login(idStudent, pwStudent, false);
+  sendToAPI();
 }
 
 void loop()
@@ -200,18 +218,20 @@ void loop()
   Temperature = dht.readTemperature();
   // Gets the values of the humidity
   Humidity = dht.readHumidity();
-  
-  // Serial.println(Temperature);
-  // Serial.println(Humidity);
 
+  // Will upload data when device connects to webpage or refreshes
   webServer.handleClient();
+
   //Send a HTTP POST request every 10 minutes
   if ((millis() - lastTime) > timerDelay)
   {
     sendHTTP();
+    sendToAPI();
 
     lastTime = millis();
   }
+  
+  // Update values on lcd screen
   updateStats(Temperature, Humidity);
   screen();
 }
