@@ -61,7 +61,11 @@ void sendHTTP()
     http.begin(serverName);
 
     http.addHeader("Content-Type", "application/x-www-form-urlencoded");
-    String httpRequestData = "api_key=" + apiKeyValue + "&sensor=" + sensorName + "&location=" + sensorLocation + "&value1=" + String(dht.readTemperature()) + "&value2=" + String(dht.readHumidity()) + "&value3=" + String(dht.readTemperature(true)) + "";
+    String httpRequestData = "api_key=" + apiKeyValue + "&sensor=" + sensorName + "&location=" \
+    + sensorLocation + "&value1=" + String(dht.readTemperature()) + "&value2=" \
+    + String((int)dht.readHumidity()) + "&value3=" \
+    + String(dht.readTemperature(true)) + "";
+    
     int httpResponseCode = http.POST(httpRequestData);
 
     if (httpResponseCode > 0)
@@ -114,7 +118,7 @@ String SendHTML(float Temperaturestat, float Humiditystat, float Fahrn)
   ptr += "<span>&#176;</span>";
   ptr += "F</p>";
   ptr += "<p>Humidity: ";
-  ptr += (float)Humiditystat;
+  ptr += (int)Humiditystat;
   ptr += "%</p>";
 
   ptr += "</div>\n";
