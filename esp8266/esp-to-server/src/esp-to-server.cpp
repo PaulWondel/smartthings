@@ -146,14 +146,12 @@ void screen()
   if (state > 100)
   {
     // Serial.println("Turn Display off");
-    lcd.noBacklight();
-    lcd.noDisplay();
+    powerDisplay(false);
   }
   else
   {
     // Serial.println("Turn Display on");
-    lcd.backlight();
-    lcd.display();
+    powerDisplay(true);
     delay(2000);
   }
 }
@@ -168,7 +166,6 @@ void sendToAPI(){
 void setup()
 {
   initDisplay();
-  lcd.printstr("Starting up.....");
 
   Serial.begin(115200);
   delay(100);
@@ -202,13 +199,7 @@ void setup()
   webServer.begin();
   Serial.println("HTTP server started");
 
-  lcd.clear();
-  lcd.setCursor(0, 0);
-  lcd.print("Weather Station");
-  lcd.setCursor(0, 1);
-  lcd.print(WiFi.localIP());
-  delay(3000);
-  lcd.clear();
+  startUpMesg(WiFi.localIP().toString());
 
   sendHTTP();
 

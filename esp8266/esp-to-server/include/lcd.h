@@ -14,6 +14,7 @@ void initDisplay()
   lcd.init();
   lcd.backlight();
   lcd.display();
+  lcd.printstr("Starting up.....");
 }
 
 // Update values on LCD screen
@@ -79,4 +80,34 @@ void errorSiteMesg()
   lcd.print("to website");
   delay(10000);
   lcd.clear();
+}
+
+// Print a startup message with IP information on the lcd display
+void startUpMesg(String ipAddress)
+{
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("Weather Station");
+  lcd.setCursor(0, 1);
+  lcd.print(ipAddress);
+  delay(3000);
+  lcd.clear();
+}
+
+// Turn lcd display on or off
+void powerDisplay(boolean choice)
+{
+  switch(choice)
+  {
+    case true:
+      lcd.backlight();
+      lcd.display();
+      break;
+    case false:
+      lcd.noBacklight();
+      lcd.noDisplay();
+      break;
+    default:
+      break;
+  }
 }
