@@ -78,7 +78,7 @@ void errorSiteMesg()
   lcd.print("Error uploading");
   lcd.setCursor(0, 1);
   lcd.print("to website");
-  delay(10000);
+  delay(5000);
   lcd.clear();
 }
 
@@ -97,17 +97,34 @@ void startUpMesg(String ipAddress)
 // Turn lcd display on or off
 void powerDisplay(boolean choice)
 {
-  switch(choice)
+  switch (choice)
   {
-    case true:
-      lcd.backlight();
-      lcd.display();
-      break;
-    case false:
-      lcd.noBacklight();
-      lcd.noDisplay();
-      break;
-    default:
-      break;
+  case true:
+    lcd.backlight();
+    lcd.display();
+    break;
+  case false:
+    lcd.noBacklight();
+    lcd.noDisplay();
+    break;
+  default:
+    break;
+  }
+}
+
+// Turn display on and of if object is detected in front of weather station
+void screen()
+{
+  long state = analogRead(ProxSensor);
+  if (state > 100)
+  {
+    // Serial.println("Turn Display off");
+    powerDisplay(false);
+  }
+  else
+  {
+    // Serial.println("Turn Display on");
+    powerDisplay(true);
+    delay(2000);
   }
 }
