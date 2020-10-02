@@ -10,3 +10,6 @@ To upload the data to your own website edit the information in the `httpclient.h
 
 ## Design
 The fritzing and electrical schemes still need to be added and will be soon.
+
+### Fritzing
+![Breadboard Circuit](esp-to-server/circuit_bb.png)
