@@ -9,7 +9,13 @@ the `credentials_example.h`. You can simply just copy it.
 To upload the data to your own website edit the information in the `httpclient.h` file.
 
 ## Design
-The fritzing and electrical schemes still need to be added and will be soon.
+Here are the designs on how the circuit and system is built.
 
 ### Fritzing
 ![](sheets/circuit_bb.png)
+
+### Electrical Scheme
+![](sheets/circuit_schem.png)
+
+### Software Architecture
+![](sheets/architecture.svg)
