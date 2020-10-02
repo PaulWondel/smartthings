@@ -18,4 +18,4 @@ Here are the designs on how the circuit and system is built.
 ![](sheets/circuit_schem.png)
 
 ### Software Architecture
-![](sheets/architecture.svg)
+<!-- ![](sheets/architecture.svg) -->
