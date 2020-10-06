@@ -35,7 +35,6 @@ void updateStats(float temp, float hum)
   lcd.print((int)hum);
   lcd.setCursor(15, 1);
   lcd.print("%");
-  // delay(1000);
 }
 
 // Display search for wifi message
@@ -126,5 +125,34 @@ void screen()
     // Serial.println("Turn Display on");
     powerDisplay(true);
     delay(2000);
+  }
+}
+
+// Turn display on and of if motion is detected near weather station
+void PIRSensor()
+{
+  if (digitalRead(ProxSensor) == HIGH)
+  {
+    if (lockLow)
+    {
+      PIRValue = 1;
+      lockLow = false;
+      powerDisplay(true);
+    }
+    takeLowTime = true;
+  }
+  if (digitalRead(ProxSensor) == LOW)
+  {
+    if (takeLowTime)
+    {
+      lowIn = millis();
+      takeLowTime = false;
+    }
+    if (!lockLow && millis() - lowIn > pause)
+    {
+      PIRValue = 0;
+      lockLow = true;
+      powerDisplay(false);
+    }
   }
 }

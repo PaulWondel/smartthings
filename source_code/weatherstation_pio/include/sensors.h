@@ -5,6 +5,13 @@
 //#define DHTTYPE DHT21   // DHT 21 (AM2301)
 //#define DHTTYPE DHT22   // DHT 22  (AM2302), AM2321
 
+int calibrationTime = 30;
+long unsigned int lowIn;
+long unsigned int pause;
+boolean lockLow = true;
+boolean takeLowTime;
+int PIRValue = 0;
+
 // DHT Sensor
 uint8_t DHTPin = D5;
 
@@ -12,7 +19,14 @@ uint8_t DHTPin = D5;
 DHT dht(DHTPin, DHTTYPE);
 
 // defines pins numbers
-const int ProxSensor=A0;
+const int ProxSensor=D6;
+
+// Set PINMODE for setup()
+void setPINMODE()
+{
+  pinMode(DHTPin, INPUT);
+  pinMode(ProxSensor, INPUT);
+}
 
 // Initialize dht pin
 void initDHT()
@@ -38,3 +52,10 @@ float getHumid()
   return dht.readHumidity();
 }
 
+// Set motion pause for set seconds
+void setMotionDelay(int timer)
+{
+  timer = timer*(1000);
+  pause = timer;
+  digitalWrite(ProxSensor, LOW);
+}
