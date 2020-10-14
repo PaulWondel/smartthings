@@ -1,3 +1,3 @@
 (sym_lib_table
-  (lib (name MCU_Espressiv_8266nodemcu)(type Legacy)(uri "D:/HRo/Minor Smart Things/smartthings/workshops/pcb/MCU_Espressiv_8266nodemcu.lib")(options "")(descr ""))
+  (lib (name MCU_Espressiv_8266nodemcu)(type Legacy)(uri ${KIPRJMOD}/MCU_Espressiv_8266nodemcu.lib)(options "")(descr ""))
 )
