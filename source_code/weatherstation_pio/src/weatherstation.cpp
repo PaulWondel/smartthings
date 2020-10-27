@@ -10,7 +10,7 @@
 // the following variables are unsigned longs because the time, measured in
 // milliseconds, will quickly become a bigger number than can be stored in an int.
 // Timer for 10 minutes (600000), 30 seconds (30000)
-unsigned long timerDelay = 600000;
+unsigned long timerDelay = 300000;
 unsigned long lastTime = 0;
 
 // API settings
@@ -23,7 +23,7 @@ void sendToAPI()
 {
   api.postWeatherData("Temperature", getTempCel(), weatherStationId);
   api.postWeatherData("Humidity", getHumid(), weatherStationId);
-  api.postWeatherData("WindSpeed", 0, weatherStationId);
+  api.postWeatherData("WindSpeed", getWindSpeed(), weatherStationId);
   Serial.println("Data successfully sent to API");
 }
 
@@ -71,7 +71,7 @@ void loop()
     lastTime = millis();
   }
   // Update values on lcd screen
-  updateStats(getTempCel(), getHumid()); 
+  updateStats(getTempCel(), getHumid(), getWindSpeed()); 
   // TODO: windspeed toevoegen, met getWindSpeed
   
   // Turn display on and of if object/motion is detected near weather station

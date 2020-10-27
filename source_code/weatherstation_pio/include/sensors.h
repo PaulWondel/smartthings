@@ -13,13 +13,15 @@ boolean takeLowTime;
 int PIRValue = 0;
 
 // Anemometer pin
-int windPin = D7;
+int windPin = 13;
 
 volatile byte pulse;
 int speed = 0;
 
 unsigned long previousTime;
 const long interval = 3000;
+// Radius of anenometer
+float rRadius = 0.108;
 
 // DHT Sensor
 uint8_t DHTPin = D5;
@@ -62,12 +64,22 @@ float getHumid()
   return dht.readHumidity();
 }
 
+float getWindSpeed()
+{
+  return speed;
+}
+
 // Set motion pause for set seconds
 void setMotionDelay(int timer)
 {
   timer = timer*(1000);
   pause = timer;
   digitalWrite(ProxSensor, LOW);
+}
+
+void ICACHE_RAM_ATTR pulseCount()
+{
+  pulse++;
 }
 
 void setupWindSpeed()
@@ -77,11 +89,6 @@ void setupWindSpeed()
   previousTime = 0;
 }
 
-void pulseCount()
-{
-  pulse++;
-}
-
 void speedDetect()
 {
   unsigned long currentTime = millis();
@@ -89,9 +96,12 @@ void speedDetect()
   {
     detachInterrupt(windPin);
     speed = 60000.0 / (currentTime - previousTime) * pulse;
-    Serial.print(speed, DEC);
-    Serial.print(" RPM ");
-    Serial.println(digitalRead(windPin));
+    // Serial.print(speed, DEC);
+    // Serial.println(" RPM ");
+    speed = ((TWO_PI*rRadius)/60)*speed;
+    // Serial.print(speed, DEC);
+    // Serial.println(" m/s ");
+    // Serial.println(digitalRead(windPin));
     pulse = 0;
     attachInterrupt(digitalPinToInterrupt(windPin), pulseCount, FALLING);
     previousTime = millis();
