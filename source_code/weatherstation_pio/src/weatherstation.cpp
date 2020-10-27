@@ -40,6 +40,7 @@ void setup()
   delay(100);
 
   setPINMODE();
+  setupWindSpeed();
   init_all();
 
   // Leave display on for a few seconds
@@ -70,8 +71,11 @@ void loop()
     lastTime = millis();
   }
   // Update values on lcd screen
-  updateStats(getTempCel(), getHumid());
+  updateStats(getTempCel(), getHumid()); 
+  // TODO: windspeed toevoegen, met getWindSpeed
+  
   // Turn display on and of if object/motion is detected near weather station
   // screen();
   PIRSensor();
+  speedDetect();
 }

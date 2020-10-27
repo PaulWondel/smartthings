@@ -12,6 +12,15 @@ boolean lockLow = true;
 boolean takeLowTime;
 int PIRValue = 0;
 
+// Anemometer pin
+int windPin = D7;
+
+volatile byte pulse;
+int speed = 0;
+
+unsigned long previousTime;
+const long interval = 3000;
+
 // DHT Sensor
 uint8_t DHTPin = D5;
 
@@ -26,6 +35,7 @@ void setPINMODE()
 {
   pinMode(DHTPin, INPUT);
   pinMode(ProxSensor, INPUT);
+  pinMode(windPin, INPUT_PULLUP);
 }
 
 // Initialize dht pin
@@ -58,4 +68,32 @@ void setMotionDelay(int timer)
   timer = timer*(1000);
   pause = timer;
   digitalWrite(ProxSensor, LOW);
+}
+
+void setupWindSpeed()
+{
+  attachInterrupt(digitalPinToInterrupt(windPin), pulseCount, FALLING);
+  pulse = 0;
+  previousTime = 0;
+}
+
+void pulseCount()
+{
+  pulse++;
+}
+
+void speedDetect()
+{
+  unsigned long currentTime = millis();
+  if (currentTime - previousTime > interval)
+  {
+    detachInterrupt(windPin);
+    speed = 60000.0 / (currentTime - previousTime) * pulse;
+    Serial.print(speed, DEC);
+    Serial.print(" RPM ");
+    Serial.println(digitalRead(windPin));
+    pulse = 0;
+    attachInterrupt(digitalPinToInterrupt(windPin), pulseCount, FALLING);
+    previousTime = millis();
+  }
 }
