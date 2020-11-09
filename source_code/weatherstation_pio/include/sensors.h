@@ -16,7 +16,8 @@ int PIRValue = 0;
 int windPin = 13;
 
 volatile byte pulse;
-int speed = 0;
+int rpm = 0;
+float mps = 0;
 
 unsigned long previousTime;
 const long interval = 1000;
@@ -67,7 +68,7 @@ float getHumid()
 
 float getWindSpeed()
 {
-  return speed;
+  return mps;
 }
 
 // Set motion pause for set seconds
@@ -98,10 +99,10 @@ void speedDetect()
     // detachInterrupt(windPin);
     noInterrupts();
     int count = pulse;
-    speed = 60000.0 / (currentTime - previousTime) * count;
-    // Serial.print(speed, DEC);
+    rpm = 60000.0 / (currentTime - previousTime) * count;
+    // Serial.print(speed);
     // Serial.println(" RPM ");
-    speed = ((TWO_PI*rRadius)/60)*speed;
+    mps = ((TWO_PI*rRadius)/60)*rpm;
     // Serial.print(speed, DEC);
     // Serial.println(" m/s ");
     // Serial.println(digitalRead(windPin));
@@ -109,7 +110,7 @@ void speedDetect()
     // attachInterrupt(digitalPinToInterrupt(windPin), pulseCount, FALLING);
     interrupts();
     previousTime = millis();
-    // Serial.print(speed, DEC);
+    // Serial.print(speed);
     // Serial.println(" m/s ");
     // Serial.println(count);
     // Serial.println(digitalRead(windPin));
