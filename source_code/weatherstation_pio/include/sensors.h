@@ -19,9 +19,10 @@ volatile byte pulse;
 int speed = 0;
 
 unsigned long previousTime;
-const long interval = 3000;
+const long interval = 1000;
 // Radius of anenometer
 float rRadius = 0.108;
+// float rRadius = 0.02;
 
 // DHT Sensor
 uint8_t DHTPin = D5;
@@ -84,7 +85,7 @@ void ICACHE_RAM_ATTR pulseCount()
 
 void setupWindSpeed()
 {
-  attachInterrupt(digitalPinToInterrupt(windPin), pulseCount, FALLING);
+  attachInterrupt(digitalPinToInterrupt(windPin), pulseCount, RISING);
   pulse = 0;
   previousTime = 0;
 }
@@ -94,8 +95,10 @@ void speedDetect()
   unsigned long currentTime = millis();
   if (currentTime - previousTime > interval)
   {
-    detachInterrupt(windPin);
-    speed = 60000.0 / (currentTime - previousTime) * pulse;
+    // detachInterrupt(windPin);
+    noInterrupts();
+    int count = pulse;
+    speed = 60000.0 / (currentTime - previousTime) * count;
     // Serial.print(speed, DEC);
     // Serial.println(" RPM ");
     speed = ((TWO_PI*rRadius)/60)*speed;
@@ -103,7 +106,12 @@ void speedDetect()
     // Serial.println(" m/s ");
     // Serial.println(digitalRead(windPin));
     pulse = 0;
-    attachInterrupt(digitalPinToInterrupt(windPin), pulseCount, FALLING);
+    // attachInterrupt(digitalPinToInterrupt(windPin), pulseCount, FALLING);
+    interrupts();
     previousTime = millis();
+    // Serial.print(speed, DEC);
+    // Serial.println(" m/s ");
+    // Serial.println(count);
+    // Serial.println(digitalRead(windPin));
   }
 }

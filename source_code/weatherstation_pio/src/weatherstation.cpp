@@ -75,6 +75,7 @@ void loop()
   // TODO: windspeed toevoegen, met getWindSpeed
   
   // Turn display on and of if object/motion is detected near weather station
+  // powerDisplay(true);
   // screen();
   PIRSensor();
   speedDetect();
