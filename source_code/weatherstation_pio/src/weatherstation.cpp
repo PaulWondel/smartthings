@@ -10,7 +10,7 @@
 // the following variables are unsigned longs because the time, measured in
 // milliseconds, will quickly become a bigger number than can be stored in an int.
 // Timer for 10 minutes (600000), 30 seconds (30000)
-unsigned long timerDelay = 300000;
+unsigned long timerDelay = 150000;
 unsigned long lastTime = 0;
 
 // API settings
@@ -60,6 +60,16 @@ void loop()
   // Will upload data when device connects to webpage or refreshes
   runServer();
 
+  // Update values on lcd screen
+  updateStats(getTempCel(), getHumid(), getWindSpeed()); 
+  // TODO: windspeed toevoegen, met getWindSpeed
+  
+  // Turn display on and of if object/motion is detected near weather station
+  // powerDisplay(true);
+  // screen();
+  PIRSensor();
+  speedDetect();
+
   //Send data every 10 minutes
   if ((millis() - lastTime) > timerDelay)
   {
@@ -70,13 +80,4 @@ void loop()
 
     lastTime = millis();
   }
-  // Update values on lcd screen
-  updateStats(getTempCel(), getHumid(), getWindSpeed()); 
-  // TODO: windspeed toevoegen, met getWindSpeed
-  
-  // Turn display on and of if object/motion is detected near weather station
-  // powerDisplay(true);
-  // screen();
-  PIRSensor();
-  speedDetect();
 }
