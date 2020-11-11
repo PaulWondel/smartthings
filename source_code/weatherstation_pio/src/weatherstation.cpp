@@ -2,6 +2,7 @@
 
 #include <SmartThings.h>
 #include "sensors.h"
+#include "roomsphere.h"
 #include "lcd.h"
 #include "wifi_settings.h"
 #include "httpclient.h"
@@ -32,6 +33,7 @@ void init_all()
 {
   initDisplay();
   initDHT();
+  initRGB();
 }
 
 void setup()
@@ -61,14 +63,14 @@ void loop()
   runServer();
 
   // Update values on lcd screen
-  updateStats(getTempCel(), getHumid(), getWindSpeed()); 
-  // TODO: windspeed toevoegen, met getWindSpeed
+  updateStats(getTempCel(), getHumid(), getWindSpeed());
   
   // Turn display on and of if object/motion is detected near weather station
   // powerDisplay(true);
   // screen();
   PIRSensor();
   speedDetect();
+  pickColor(int(getTempCel()));
 
   //Send data every 10 minutes
   if ((millis() - lastTime) > timerDelay)
