@@ -5,15 +5,21 @@
 //#define DHTTYPE DHT21   // DHT 21 (AM2301)
 //#define DHTTYPE DHT22   // DHT 22  (AM2302), AM2321
 
+// DHT Sensor pin SD3
+uint8_t DHTPin = 10;
+
+// Proximity Sensor pin SD2
+const int ProxSensor = 9;
+
+// Anemometer pin D7
+int windPin = 13;
+
 int calibrationTime = 30;
 long unsigned int lowIn;
 long unsigned int pause;
 boolean lockLow = true;
 boolean takeLowTime;
 int PIRValue = 0;
-
-// Anemometer pin
-int windPin = 13;
 
 volatile byte pulse;
 int rpm = 0;
@@ -25,14 +31,8 @@ const long interval = 1000;
 float rRadius = 0.108;
 // float rRadius = 0.02;
 
-// DHT Sensor
-uint8_t DHTPin = D5;
-
 // Initialize DHT sensor.
 DHT dht(DHTPin, DHTTYPE);
-
-// defines pins numbers
-const int ProxSensor=D6;
 
 // Set PINMODE for setup()
 void setPINMODE()
