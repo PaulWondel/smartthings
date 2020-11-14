@@ -66,6 +66,7 @@ float getHumid()
   return dht.readHumidity();
 }
 
+// Gets the values of the windspeed
 float getWindSpeed()
 {
   return mps;
@@ -79,11 +80,13 @@ void setMotionDelay(int timer)
   digitalWrite(ProxSensor, LOW);
 }
 
+// Pulse counter for interrupt
 void ICACHE_RAM_ATTR pulseCount()
 {
   pulse++;
 }
 
+// Initialize variables for setup() in main file
 void setupWindSpeed()
 {
   attachInterrupt(digitalPinToInterrupt(windPin), pulseCount, RISING);
@@ -91,26 +94,24 @@ void setupWindSpeed()
   previousTime = 0;
 }
 
+// Detect and calculate windspeed
 void speedDetect()
 {
   unsigned long currentTime = millis();
   if (currentTime - previousTime > interval)
   {
-    // detachInterrupt(windPin);
     noInterrupts();
     int count = pulse;
-    rpm = 60000.0 / (currentTime - previousTime) * count;
-    // Serial.print(speed);
-    // Serial.println(" RPM ");
+    rpm = 60000.0 / (currentTime - previousTime) * count;   
     mps = ((TWO_PI*rRadius)/60)*rpm;
-    // Serial.print(speed, DEC);
-    // Serial.println(" m/s ");
-    // Serial.println(digitalRead(windPin));
     pulse = 0;
-    // attachInterrupt(digitalPinToInterrupt(windPin), pulseCount, FALLING);
     interrupts();
     previousTime = millis();
-    // Serial.print(speed);
+
+    // FOR DEBUG PURPOSES ONLY
+    // Serial.print(rpm);
+    // Serial.println(" RPM ");
+    // Serial.print(mps);
     // Serial.println(" m/s ");
     // Serial.println(count);
     // Serial.println(digitalRead(windPin));

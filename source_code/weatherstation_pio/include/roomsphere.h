@@ -6,6 +6,7 @@ int PWM_Value_Red;
 int PWM_Value_Green;
 int PWM_Value_Blue;
 
+// Initializes variables and pins in setup() in main file
 void initRGB()
 {
   pinMode(redPin, OUTPUT);
@@ -19,6 +20,7 @@ void initRGB()
   digitalWrite(redPin, LOW);
 }
 
+// Writes Color to the LED
 void setColor()
 {
   analogWrite(redPin, PWM_Value_Red);
@@ -70,6 +72,7 @@ void off()
   PWM_Value_Blue = 0;
 }
 
+// Picks color for the RGB LED
 void pickColor(int celsius)
 {
   if(celsius <= 33 && celsius > 25)

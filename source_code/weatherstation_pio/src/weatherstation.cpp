@@ -11,7 +11,7 @@
 // the following variables are unsigned longs because the time, measured in
 // milliseconds, will quickly become a bigger number than can be stored in an int.
 // Timer for 10 minutes (600000), 30 seconds (30000)
-unsigned long timerDelay = 60000;
+unsigned long timerDelay = 300000;
 unsigned long lastTime = 0;
 
 // API settings
@@ -66,8 +66,6 @@ void loop()
   updateStats(getTempCel(), getHumid(), getWindSpeed());
   
   // Turn display on and of if object/motion is detected near weather station
-  // powerDisplay(true);
-  // screen();
   PIRSensor();
   speedDetect();
   pickColor(int(getTempCel()));
