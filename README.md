@@ -1,3 +1,5 @@
+# THIS PROJECT HAS BEEN FINALIZED AND SHELVED
+
 # Minor Smart Things
 
 This github is for all the files I create or save during the minor `Smart Things` that I

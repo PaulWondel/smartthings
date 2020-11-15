@@ -25,7 +25,8 @@ void sendHTTP()
     String httpRequestData = "api_key=" + apiKeyValue + "&sensor=" + sensorName + "&location=" \
     + sensorLocation + "&value1=" + String(getTempCel()) + "&value2=" \
     + String((int)getHumid()) + "&value3=" \
-    + String(getTempFah()) + "";
+    // + String(getTempFah()) + "";
+    + String(getWindSpeed()) + "";
     
     int httpResponseCode = http.POST(httpRequestData);
 

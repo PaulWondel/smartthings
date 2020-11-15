@@ -3,7 +3,7 @@
 ESP8266WebServer webServer(80);
 
 // Send data of HTML page to webserver
-String SendHTML(float Temperaturestat, float Humiditystat, float Fahrn)
+String SendHTML(float Temperaturestat, float Humiditystat, float Fahrn, float WindSpeed)
 {
   String ptr = "<!DOCTYPE html> <html>\n";
   ptr += "<head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, user-scalable=no\">\n";
@@ -30,6 +30,9 @@ String SendHTML(float Temperaturestat, float Humiditystat, float Fahrn)
   ptr += "<p>Humidity: ";
   ptr += (int)Humiditystat;
   ptr += "%</p>";
+  ptr += "<p>Wind Speed: ";
+  ptr += (float)WindSpeed;
+  ptr += "m/s</p>";
 
   ptr += "</div>\n";
   ptr += "</body>\n";
@@ -40,7 +43,7 @@ String SendHTML(float Temperaturestat, float Humiditystat, float Fahrn)
 // Update the values in the browser on point of connection of device to server
 void handle_OnConnect()
 {
-  webServer.send(200, "text/html", SendHTML(getTempCel(), getHumid(), getTempFah()));
+  webServer.send(200, "text/html", SendHTML(getTempCel(), getHumid(), getTempFah(), getWindSpeed()));
 }
 
 // Give error message if data not found

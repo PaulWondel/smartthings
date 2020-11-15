@@ -7,6 +7,12 @@
 // set the LCD address to 0x27 for a 16 chars and 2 line display
 LiquidCrystal_I2C lcd(0x27, 16, 2);
 
+// Timer for displaying windspeed
+unsigned long timerInterval_1 = 3000;
+unsigned long timerInterval_2 = 5000;
+unsigned long lastInterval_1 = 0;
+unsigned long lastInterval_2 = 0;
+
 // Initizialize display
 void initDisplay()
 {
@@ -18,24 +24,38 @@ void initDisplay()
 }
 
 // Update values on LCD screen
-void updateStats(float temp, float hum)
+void updateStats(float temp, float hum, float mps)
 {
-  lcd.setCursor(0, 0);
-  lcd.print("Temperature:");
+  unsigned long currentInterval = millis();
 
-  lcd.setCursor(13, 0);
-  lcd.print((int)temp);
-  lcd.setCursor(15, 0);
-  lcd.print("C");
+  if ((currentInterval - lastInterval_1 > timerInterval_1))
+  {
+    lcd.setCursor(0, 0);
+    lcd.print("Temperature:");
+    lcd.setCursor(13, 0);
+    lcd.print((int)temp);
+    lcd.setCursor(15, 0);
+    lcd.print("C");
+    lcd.setCursor(0, 1);
+    lcd.print("Humidity:");
+    lcd.setCursor(13, 1);
+    lcd.print((int)hum);
+    lcd.setCursor(15, 1);
+    lcd.print("%");
+    lastInterval_1 = currentInterval;
+  }
 
-  lcd.setCursor(0, 1);
-  lcd.print("Humidity:");
-
-  lcd.setCursor(13, 1);
-  lcd.print((int)hum);
-  lcd.setCursor(15, 1);
-  lcd.print("%");
-  // delay(1000);
+  if ((currentInterval - lastInterval_2 > timerInterval_2))
+  {
+    lcd.clear();
+    lcd.setCursor(0, 0);
+    lcd.printstr("Wind Speed:");
+    lcd.setCursor(0, 1);
+    lcd.print(mps);
+    lcd.setCursor(6, 1);
+    lcd.printstr("m/s");    
+    lastInterval_2 = currentInterval;
+  }
 }
 
 // Display search for wifi message
@@ -126,5 +146,34 @@ void screen()
     // Serial.println("Turn Display on");
     powerDisplay(true);
     delay(2000);
+  }
+}
+
+// Turn display on and of if motion is detected near weather station
+void PIRSensor()
+{
+  if (digitalRead(ProxSensor) == HIGH)
+  {
+    if (lockLow)
+    {
+      PIRValue = 1;
+      lockLow = false;
+      powerDisplay(true);
+    }
+    takeLowTime = true;
+  }
+  if (digitalRead(ProxSensor) == LOW)
+  {
+    if (takeLowTime)
+    {
+      lowIn = millis();
+      takeLowTime = false;
+    }
+    if (!lockLow && millis() - lowIn > pause)
+    {
+      PIRValue = 0;
+      lockLow = true;
+      powerDisplay(false);
+    }
   }
 }
