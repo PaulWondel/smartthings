@@ -1,4 +1,4 @@
-18994146365899688
+18994144666662708
 Battery
 BatteryHolder_Bulgin_BX0036_1xC
 Bulgin Battery Holder, BX0036, Battery Type C (https://www.bulgin.com/products/pub/media/bulgin/data/Battery_holders.pdf)
@@ -56363,13 +56363,6 @@ ESP8266 WiFi microcontroller
 0
 16
 16
-Module
-custom_logo
-
-
-0
-0
-0
 MountingEquipment
 DINRailAdapter_3xM3_PhoenixContact_1201578
 https://www.phoenixcontact.com/online/portal/us?uri=pxc-oc-itemdetail:pid=1201578&library=usen&tab=1
@@ -83040,3 +83033,10 @@ varistor SIOV
 0
 2
 2
+esp8266_nodemcu
+ESP8266_nodeMCU_V1
+32-bit microcontroller module with WiFi,
+ESP8266 Node MCU module met WiFi 
+0
+34
+31
