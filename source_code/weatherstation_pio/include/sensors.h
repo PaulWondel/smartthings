@@ -5,11 +5,11 @@
 //#define DHTTYPE DHT21   // DHT 21 (AM2301)
 //#define DHTTYPE DHT22   // DHT 22  (AM2302), AM2321
 
-// DHT Sensor pin SD3
-uint8_t DHTPin = 10;
+// DHT Sensor pin SD2
+uint8_t DHTPin = 9;
 
-// Proximity Sensor pin SD2
-const int ProxSensor = 9;
+// Proximity Sensor pin SD3
+const int ProxSensor = 10;
 
 // Anemometer pin D7
 int windPin = 13;
